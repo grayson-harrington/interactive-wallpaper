@@ -3,7 +3,7 @@
 // through a circular window. The original's per-frame random 1px grain is
 // replayed from a few pre-rendered grain layers (same shimmer, far cheaper).
 // Once everything has stopped growing it holds, then starts over
-// (the original restarted on Enter, which still works).
+// (click, or Enter as in the original, restarts it right away).
 import { dmSketch } from './harness.js';
 
 const numRects = 50;
@@ -86,6 +86,12 @@ function update(S, r) {
   r.h2 += r.sh2;
 }
 
+function restart(p, S) {
+  p.cancelScheduled();
+  initRects(p, S);
+  p.loop();
+}
+
 export default dmSketch({
   ow: 500,
   oh: 500,
@@ -132,11 +138,10 @@ export default dmSketch({
   onActivate(p, S) {
     S.holding = false; // the hold timer was cancelled when hidden; re-arm it
   },
+  mousePressed(p, S) {
+    restart(p, S);
+  },
   keyReleased(p, S) {
-    if (p.keyCode === p.ENTER || p.keyCode === p.RETURN) {
-      p.cancelScheduled();
-      initRects(p, S);
-      p.loop();
-    }
+    if (p.keyCode === p.ENTER || p.keyCode === p.RETURN) restart(p, S);
   },
 });
