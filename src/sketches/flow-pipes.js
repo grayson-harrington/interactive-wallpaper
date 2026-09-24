@@ -228,7 +228,9 @@ export default function flowPipes(p) {
       if (inAmt >= 1) {
         if (capped) {
           ctx.beginPath();
-          ctx.arc(0, 0, pipeW * 0.55 * Math.min(1, (c.fill - 0.5) * 2 + 0.3), 0, Math.PI * 2);
+          // same rim thickness as the straight sections: (pipeW - waterW) / 2
+          const capR = pipeW * 0.95 - (pipeW - waterW) / 2;
+          ctx.arc(0, 0, capR * Math.min(1, (c.fill - 0.5) * 2 + 0.3), 0, Math.PI * 2);
           ctx.fill();
         } else {
           ctx.beginPath();
