@@ -1,0 +1,384 @@
+:root {
+  --ui-bg: rgba(20, 20, 22, 0.72);
+  --ui-fg: #eee;
+  --ui-muted: #9a9a9f;
+  --ui-accent: #7fd1ae;
+  --ui-border: rgba(255, 255, 255, 0.14);
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  background: #000;
+  font: 13px/1.35 -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+  color: var(--ui-fg);
+}
+
+#stages,
+.stage {
+  position: fixed;
+  inset: 0;
+}
+
+.stage[hidden] {
+  display: none;
+}
+
+.stage canvas {
+  display: block;
+  /* pin to the corner: stray siblings (e.g. p5's offscreen buffers) must
+     never push a sketch's canvas down the page */
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+/* ---- corner menu ---- */
+
+.ui {
+  position: fixed;
+  top: 12px;
+  right: 12px;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  background: var(--ui-bg);
+  border: 1px solid var(--ui-border);
+  border-radius: 10px;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  transition: opacity 0.6s ease;
+}
+
+.ui.idle {
+  opacity: 0;
+}
+
+.ui.idle:hover,
+.ui:focus-within {
+  opacity: 1;
+}
+
+.ui[hidden] {
+  display: none;
+}
+
+.ui select,
+.ui button {
+  font: inherit;
+  color: var(--ui-fg);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--ui-border);
+  border-radius: 6px;
+  padding: 3px 6px;
+}
+
+.ui button {
+  cursor: pointer;
+  line-height: 1;
+  padding: 4px 7px;
+}
+
+.ui button[hidden] {
+  display: none;
+}
+
+.ui .cycle {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--ui-muted);
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.ui select:disabled {
+  opacity: 0.45;
+}
+
+/* ---- Daily Minimal grid ---- */
+
+.dm-grid {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  place-items: center;
+  background: rgba(0, 0, 0, 0.55);
+}
+
+.dm-grid[hidden] {
+  display: none;
+}
+
+.dm-panel {
+  width: min(900px, calc(100vw - 32px));
+  max-height: calc(100vh - 32px);
+  overflow: auto;
+  padding: 16px 18px 18px;
+  background: var(--ui-bg);
+  border: 1px solid var(--ui-border);
+  border-radius: 14px;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+.dm-panel h2 {
+  margin: 0 0 12px;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.dm-panel .grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  gap: 12px;
+}
+
+.thumb {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 0;
+  background: none;
+  border: 0;
+  color: var(--ui-muted);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.thumb img,
+.thumb::before {
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  border-radius: 8px;
+  border: 2px solid transparent;
+  object-fit: cover;
+  background: #222;
+}
+
+.thumb img {
+  display: block;
+}
+
+.thumb:not(:has(img))::before {
+  content: '';
+  display: block;
+}
+
+.thumb:hover img,
+.thumb:hover::before {
+  border-color: var(--ui-border);
+}
+
+.thumb.current {
+  color: var(--ui-fg);
+}
+
+.thumb.current img,
+.thumb.current::before {
+  border-color: var(--ui-accent);
+}
+
+/* ---- per-sketch control panels (lib/panel.js) ---- */
+
+.sk-panel {
+  position: absolute;
+  z-index: 10;
+  left: 12px;
+  top: 12px;
+  width: 300px;
+  max-height: calc(100% - 24px);
+  overflow: auto;
+  padding: 12px 14px;
+  background: var(--ui-bg);
+  border: 1px solid var(--ui-border);
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  transition: opacity 0.5s ease;
+}
+
+.sk-panel.faded {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.sk-panel h3 {
+  margin: 0 0 8px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.sk-panel .row {
+  display: grid;
+  gap: 3px;
+  margin: 0 0 9px;
+}
+
+.sk-panel .row > span {
+  display: flex;
+  justify-content: space-between;
+  color: var(--ui-muted);
+  font-size: 12px;
+}
+
+.sk-panel input[type='text'],
+.sk-panel textarea,
+.sk-panel select,
+.sk-panel input[type='number'] {
+  width: 100%;
+  font: 12px/1.4 ui-monospace, 'SF Mono', Menlo, monospace;
+  color: var(--ui-fg);
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid var(--ui-border);
+  border-radius: 6px;
+  padding: 4px 6px;
+}
+
+.sk-panel textarea {
+  resize: vertical;
+  min-height: 52px;
+}
+
+.sk-panel input[type='range'] {
+  width: 100%;
+  accent-color: var(--ui-accent);
+}
+
+.sk-panel .buttons {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.sk-panel button {
+  font: inherit;
+  color: var(--ui-fg);
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--ui-border);
+  border-radius: 6px;
+  padding: 4px 10px;
+  cursor: pointer;
+}
+
+.sk-panel .note {
+  margin: 6px 0 0;
+  color: var(--ui-muted);
+  font-size: 11.5px;
+}
+
+.sk-panel .warn {
+  color: #f0a36b;
+}
+
+.sk-toggle {
+  position: absolute;
+  z-index: 11;
+  left: 12px;
+  top: 12px;
+  font: inherit;
+  color: var(--ui-fg);
+  background: var(--ui-bg);
+  border: 1px solid var(--ui-border);
+  border-radius: 8px;
+  padding: 5px 10px;
+  cursor: pointer;
+  transition: opacity 0.5s ease;
+}
+
+.sk-toggle.faded {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.sk-hud {
+  position: absolute;
+  z-index: 10;
+  left: 12px;
+  bottom: 12px;
+  padding: 7px 10px;
+  max-width: calc(100% - 24px);
+  font: 12px/1.45 ui-monospace, 'SF Mono', Menlo, monospace;
+  color: var(--ui-fg);
+  background: var(--ui-bg);
+  border: 1px solid var(--ui-border);
+  border-radius: 8px;
+  white-space: pre-wrap;
+  pointer-events: none;
+  transition: opacity 0.5s ease;
+}
+
+.sk-hud.faded {
+  opacity: 0;
+}
+
+/* ---- Traditional Wallpaper ---- */
+
+.photos {
+  background: #000;
+}
+
+.photos img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+}
+
+.photos-message {
+  position: absolute;
+  inset: auto 0 40% 0;
+  text-align: center;
+  color: var(--ui-muted);
+}
+
+.sk-panel .legend {
+  margin: 0 0 12px;
+  font-size: 12px;
+}
+
+.sk-panel .legend div {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin: 3px 0;
+  color: var(--ui-muted);
+}
+
+.sk-panel .legend b {
+  color: var(--ui-fg);
+  font-weight: 500;
+  min-width: 48px;
+}
+
+.sk-panel .legend i {
+  flex: none;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+}
+
+.sk-panel .legend .note {
+  margin: 4px 0 6px;
+}
+
+.sk-toggle.corner-br,
+.sk-panel.corner-br {
+  left: auto;
+  top: auto;
+  right: 12px;
+  bottom: 12px;
+}

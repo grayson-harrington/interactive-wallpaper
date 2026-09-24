@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Plash Input Test</title>
+    <style>
+      html, body { margin: 0; height: 100%; overflow: hidden; background: #111; color: #eee;
+        font: 15px/1.45 -apple-system, BlinkMacSystemFont, sans-serif; }
+      .box { position: fixed; left: 24px; top: 24px; z-index: 2; width: 380px; padding: 16px 18px;
+        background: rgba(30,30,34,.85); border: 1px solid rgba(255,255,255,.15); border-radius: 12px; }
+      h1 { font-size: 17px; margin: 0 0 8px; }
+      input { width: 100%; font: inherit; padding: 6px 8px; margin: 6px 0 10px; color: #eee;
+        background: #222; border: 1px solid #555; border-radius: 6px; }
+      table { width: 100%; border-collapse: collapse; }
+      td { padding: 3px 0; }
+      td:last-child { text-align: right; font-variant-numeric: tabular-nums; }
+      .yes { color: #7fd1ae; } .no { color: #f0a36b; }
+      p { color: #aaa; font-size: 13px; margin: 10px 0 0; }
+    </style>
+  </head>
+  <body>
+    <div class="box">
+      <h1>Plash input test</h1>
+      <div>Type here:</div>
+      <input id="text" placeholder="click, then type…" autocomplete="off" />
+      <table>
+        <tr><td>Mouse move</td><td id="move" class="no">not seen</td></tr>
+        <tr><td>Click</td><td id="click" class="no">not seen</td></tr>
+        <tr><td>Keyboard</td><td id="key" class="no">not seen</td></tr>
+      </table>
+      <p>The circle should follow the mouse and change color when clicked.
+        Results are also saved to the wallpaper server (<code>/api/state</code>, key <code>inputTest</code>).</p>
+    </div>
+    <script type="module" src="/src/spike.js"></script>
+  </body>
+</html>

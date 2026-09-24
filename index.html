@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Interactive Wallpaper</title>
+  </head>
+  <body>
+    <div id="stages"></div>
+
+    <div id="ui" class="ui" hidden>
+      <select id="pick" aria-label="Wallpaper"></select>
+      <button id="grid-btn" type="button" title="Choose a Daily Minimal piece" hidden>▦</button>
+      <label class="cycle" title="Automatically switch to a random piece">
+        <input id="cycle" type="checkbox" /> Auto-cycle
+      </label>
+      <select id="cycle-min" aria-label="Auto-cycle interval"></select>
+    </div>
+
+    <div id="dm-grid" class="dm-grid" hidden>
+      <div class="dm-panel">
+        <h2>Daily Minimal</h2>
+        <div class="grid"></div>
+      </div>
+    </div>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

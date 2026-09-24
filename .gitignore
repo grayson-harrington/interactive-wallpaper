@@ -1,0 +1,9 @@
+node_modules
+dist
+.state.json
+check-out
+.DS_Store
+
+# personal images stay local; the folders are kept via .gitkeep
+images/*/*
+!images/*/.gitkeep
