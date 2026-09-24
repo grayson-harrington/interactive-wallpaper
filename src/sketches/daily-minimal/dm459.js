@@ -47,6 +47,8 @@ function bobbleImage(d) {
   return c;
 }
 
+const smoothstep = (t) => t * t * (3 - 2 * t);
+
 function bobble(x, y, img) {
   return { rx: x, ry: y, x, y, vx: 0, vy: 0, d: ballS, maxOff: ballS * 1.5, grabbed: false, img, gx: 0, gy: 0 };
 }
@@ -107,9 +109,14 @@ export default dmSketch({
     // ambient: grab a random bobble, pull it somewhere, let go
     if (!S.live) {
       if (S.pluck) {
-        S.pluck.t++;
-        if (S.pluck.t > S.pluck.hold) {
-          S.pluck.b.grabbed = false;
+        const pl = S.pluck;
+        pl.t++;
+        // ease the pull point out from rest instead of jumping there
+        const k = smoothstep(Math.min(1, pl.t / pl.dragLen));
+        pl.b.gx = pl.b.rx + (pl.tx - pl.b.rx) * k;
+        pl.b.gy = pl.b.ry + (pl.ty - pl.b.ry) * k;
+        if (pl.t > pl.dragLen + pl.hold) {
+          pl.b.grabbed = false;
           S.pluck = null;
         }
       } else if (--S.nextPluck <= 0) {
@@ -117,9 +124,16 @@ export default dmSketch({
         const a = Math.random() * Math.PI * 2;
         const r = rand(80, 200);
         b.grabbed = true;
-        b.gx = b.rx + Math.cos(a) * r;
-        b.gy = b.ry + Math.sin(a) * r;
-        S.pluck = { b, t: 0, hold: Math.floor(rand(15, 40)) };
+        b.gx = b.rx;
+        b.gy = b.ry;
+        S.pluck = {
+          b,
+          t: 0,
+          tx: b.rx + Math.cos(a) * r,
+          ty: b.ry + Math.sin(a) * r,
+          dragLen: Math.floor(rand(25, 45)),
+          hold: Math.floor(rand(15, 40)),
+        };
         S.nextPluck = Math.floor(rand(150, 420));
       }
     } else if (S.pluck) {
