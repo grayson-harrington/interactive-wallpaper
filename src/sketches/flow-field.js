@@ -9,8 +9,8 @@
 //
 // "Erase marks after" (Settings) keeps a rolling window instead of drawing
 // forever: strokes go into a ring of LAYERS offscreen layers, each holding a
-// slice of recent frames; the oldest layer is wiped and reused, so marks
-// disappear roughly N frames after they were drawn. At "never" it behaves
+// slice of recent frames; the oldest layer fades out over one slice, then is
+// wiped and reused, so marks fade away roughly N frames after being drawn. At "never" it behaves
 // like the original.
 //
 // Energy: the original ran 10,000 particles at 60fps. Here 4,000 particles
@@ -195,7 +195,14 @@ export default function flowField(p) {
     ctx.stroke();
     if (ctx !== p.drawingContext) {
       p.background(250);
-      for (let k = 1; k <= LAYERS; k++) p.drawingContext.drawImage(layers[(current + k) % LAYERS], 0, 0);
+      // the oldest layer fades out over its last span instead of vanishing
+      // all at once when it is wiped for reuse
+      const span = Math.max(1, Math.ceil(eraseAfter / LAYERS));
+      const g = p.drawingContext;
+      g.globalAlpha = Math.max(0, 1 - (frame - layerStart + 1) / span);
+      g.drawImage(layers[(current + 1) % LAYERS], 0, 0);
+      g.globalAlpha = 1;
+      for (let k = 2; k <= LAYERS; k++) g.drawImage(layers[(current + k) % LAYERS], 0, 0);
     }
     createField();
   };
