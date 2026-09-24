@@ -124,8 +124,10 @@ export default function bicycleGalaxy(p) {
   function drawTrail(ctx, track) {
     const [r, g, b] = track.color;
     const head = track.pos(theta);
-    // long enough to leave the screen on the left
-    const span = (X(head) / k + 0.4) / DRIFT;
+    // Long enough to leave the screen on the left. The tail's position within
+    // its own rotation differs from the head's, so a rim point's tail can sit
+    // up to a wheel diameter further right: add that as margin.
+    const span = (X(head) / k + 2 * R_WHEEL + 0.4) / DRIFT;
     const at = (lag) => {
       const q = track.pos(theta - lag);
       return [q[0] - lag * DRIFT, q[1]];
