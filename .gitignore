@@ -7,3 +7,6 @@ check-out
 # personal images stay local; the folders are kept via .gitkeep
 images/*/*
 !images/*/.gitkeep
+
+# private Daily Minimal outreach (drafts to Pierre Voisin, screen recordings)
+src/sketches/daily-minimal/outreach/
