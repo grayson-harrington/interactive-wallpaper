@@ -34,24 +34,16 @@ function diamond(ctx, cx, cy, r) {
   ctx.closePath();
 }
 
+// Both diamonds sit on the same horizontal line, so their overlap is the
+// diamond spanning the inner pair of left/right points. (The original picked
+// between three cases and drew too wide a window when one diamond sat
+// entirely inside the other.)
 function interact(p, S, a, b) {
-  const dist = (x1, y1, x2, y2) => Math.hypot(x1 - x2, y1 - y2);
-  if (dist(a.x, a.y, b.x, b.y) > a.d + b.d) return;
+  const left = Math.max(a.x - a.d, b.x - b.d);
+  const right = Math.min(a.x + a.d, b.x + b.d);
+  if (right <= left) return;
   const ctx = p.drawingContext;
-  const midY = S.oh / 2;
-  if (dist(a.x, a.y, b.x - b.d, b.y) < a.d && dist(a.x, a.y, b.x + b.d, b.y) < a.d) {
-    diamond(ctx, b.x, b.y, b.d); // b fully inside a
-  } else if (dist(a.x, a.y, b.x + a.d, b.y) < a.d) {
-    const newx = (b.x + b.d + (a.x - a.d)) / 2;
-    const diag = (b.x + b.d - (a.x - a.d)) / 2;
-    diamond(ctx, newx, midY, diag);
-  } else if (dist(a.x, a.y, b.x - a.d, b.y) < a.d) {
-    const newx = (b.x - b.d + (a.x + a.d)) / 2;
-    const diag = (a.x + a.d - (b.x - b.d)) / 2;
-    diamond(ctx, newx, midY, diag);
-  } else {
-    return;
-  }
+  diamond(ctx, (left + right) / 2, S.oh / 2, (right - left) / 2);
   fillPathWithTexture(ctx, S.paperBack);
 }
 
