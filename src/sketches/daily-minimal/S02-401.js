@@ -4,7 +4,9 @@
 import { dmSketch } from './harness.js';
 import { dotPaperCanvas } from '../../lib/paper.js';
 
-const gap = 10;
+// half the original speed; bars spawn half as often to keep their spacing
+const speed = 0.5;
+const gap = 20;
 const circleWidth = 300;
 const start = -circleWidth / 2;
 const stop = circleWidth / 2 + 50;
@@ -55,7 +57,7 @@ export default dmSketch({
         continue;
       }
       p.rect(pos, 0, w, 400);
-      S.positions[i] = pos + Math.pow(p.map(pos, start, stop, 1, 2), 6);
+      S.positions[i] = pos + speed * Math.pow(p.map(pos, start, stop, 1, 2), 6);
     }
     if (S.frame % gap === 0) S.positions.push(start);
 
