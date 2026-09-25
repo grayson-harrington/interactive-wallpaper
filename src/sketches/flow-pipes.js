@@ -153,11 +153,6 @@ export default function flowPipes(p) {
   // ---- ambient solver ------------------------------------------------------
 
   function aiStep() {
-    const touchesWater = (c) =>
-      DIRS.some(([, di, dj]) => {
-        const n = at(c.i + di, c.j + dj);
-        return n && n.connected;
-      });
     // a connected pipe with an arm that leads nowhere (wall or a neighbor
     // that doesn't open back toward it)
     const hasOpenEnd = (c) =>
@@ -166,24 +161,34 @@ export default function flowPipes(p) {
         const n = at(c.i + di, c.j + dj);
         return !n || !(n.mask & opp);
       });
-    // a frontier pipe that a watered pipe has an open arm pointing into -
-    // rotating it to face back is what extends the flow
+    // a frontier pipe that a correctly placed watered pipe points into -
+    // rotating it to face back extends the flow along the real solution.
+    // (Arms of misrotated watered pipes are ignored so the solver doesn't
+    // chase false branches that later drain.)
     const fedByWater = (c) =>
       DIRS.some(([, di, dj, opp]) => {
         const n = at(c.i + di, c.j + dj);
-        return n && n.connected && n.mask & opp;
+        return n && n.connected && n.mask === n.solved && n.mask & opp;
+      });
+    // a misrotated watered pipe whose solved arm leads to a dry neighbor:
+    // it's what seals a branch off, so fixing it reopens that branch
+    const blocksBranch = (c) =>
+      DIRS.some(([bit, di, dj]) => {
+        if (!(c.solved & bit)) return false;
+        const n = at(c.i + di, c.j + dj);
+        return n && !n.connected;
       });
     // candidates, in priority order (never settled, fully joined pipes):
-    // 1. frontier pipes a dangling opening points into
+    // 1. frontier pipes a correct watered pipe points into
     // 2. watered pipes that still have a dangling opening
-    // 3. any frontier pipe next to the water
-    // 4. stuck: some misrotated pipe elsewhere in the water is blocking a branch
+    // 3. water sealed off: the misrotated watered pipe blocking a branch
+    // 4. fallback (shouldn't be reached): any misrotated pipe
     const unsolved = cells.filter((c) => c.mask !== c.solved);
     const tiers = [
       () => unsolved.filter((c) => !c.connected && fedByWater(c)),
       () => unsolved.filter((c) => c.connected && hasOpenEnd(c)),
-      () => unsolved.filter((c) => !c.connected && touchesWater(c)),
-      () => unsolved.filter((c) => c.connected),
+      () => unsolved.filter((c) => c.connected && blocksBranch(c)),
+      () => unsolved,
     ];
     let pool = [];
     for (const tier of tiers) if ((pool = tier()).length) break;
