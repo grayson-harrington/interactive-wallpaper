@@ -7,9 +7,9 @@
 //    holds for a few seconds, and reseeds. Unchanged boards are never redrawn.
 //  * Edit: any click or key on the board switches to the original editor,
 //    feature for feature:
-//      space  pause/run          r  reseed at the current probability
-//      c      clear (pauses)     n  "Probability of Life" start screen
-//      click  toggle a cell      drag  paint/erase (while paused)
+//      space  pause/run          r  reseed (25% alive)
+//      c      clear
+//      click  toggle a cell      drag  paint/erase
 //      right-drag  select a region and copy it
 //      p      paste mode: arrows rotate/flip, click to stamp, Esc cancels
 //    The cell color is adjustable from the Colors button (bottom right).
@@ -24,16 +24,7 @@ const EDIT_IDLE_MS = 120_000;
 const HOLD_MS = 4000;
 const HISTORY = 32;
 const MAX_GENERATIONS = 5000;
-
-const FONT_URL = `${import.meta.env.BASE_URL}assets/fonts/LCD_Solid.ttf`;
-let fontReady = null;
-function loadFont() {
-  fontReady ??= new FontFace('LCD Solid', `url(${FONT_URL})`)
-    .load()
-    .then((f) => document.fonts.add(f))
-    .catch(() => {});
-  return fontReady;
-}
+const SEED_PERCENT = 25; // share of cells alive after a reseed (the original's default)
 
 export default function gameOfLife(p) {
   let numX = 0;
@@ -44,7 +35,6 @@ export default function gameOfLife(p) {
 
   let mode = 'ambient';
   let lastEditInput = 0;
-  let probability = 25;
 
   // ambient bookkeeping
   const history = [];
@@ -54,8 +44,6 @@ export default function gameOfLife(p) {
   let dirty = true;
 
   // editor state (names follow the original)
-  let gettingProb = false;
-  let input = '';
   let pause = false;
   let tickToggle = 0;
   let pasting = false;
@@ -120,12 +108,11 @@ export default function gameOfLife(p) {
     g.stroke();
   }
 
-  function setCells(prob = probability) {
+  function setCells(prob = SEED_PERCENT) {
     for (let k = 0; k < cells.length; k++) {
       cells[k] = Math.floor(Math.random() * 100) < prob ? 1 : 0;
       next[k] = 0;
     }
-    if (prob === 0) pause = true;
     history.length = 0;
     generation = 0;
     stagnant = false;
@@ -175,29 +162,6 @@ export default function gameOfLife(p) {
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.drawImage(grid, 0, 0);
     ctx.restore();
-  }
-
-  function textScreen() {
-    p.background(0);
-    p.textFont('LCD Solid');
-    p.noStroke();
-    p.fill(alive);
-    p.textAlign(p.CENTER);
-    p.textSize(50);
-    p.text('The Game of Life', p.width / 2, p.height / 4);
-    p.textSize(30);
-    p.text('Probability of Life:', p.width / 2, p.height / 2);
-    p.text('%', p.width / 2 + p.textWidth('.'), p.height / 2 + 60);
-    if (p.frameCount % 30 < 15) {
-      p.stroke(alive);
-      p.line(p.width / 2, p.height / 2 + 30, p.width / 2, p.height / 2 + 60);
-      p.noStroke();
-    }
-    p.textAlign(p.RIGHT);
-    p.text(input, p.width / 2, p.height / 2 + 60);
-    p.textSize(10);
-    p.textAlign(p.LEFT);
-    p.text('Original Game of Life was developed by John Conway in 1970.', 10, p.height - 10);
   }
 
   function showPaste() {
@@ -267,7 +231,6 @@ export default function gameOfLife(p) {
     p.cancelScheduled();
     holdScheduled = false;
     stagnant = false;
-    pause = true;
     p.frameRate(30);
     p.loop();
     hudFade.wake();
@@ -275,7 +238,7 @@ export default function gameOfLife(p) {
 
   function enterAmbient() {
     mode = 'ambient';
-    gettingProb = pasting = false;
+    pasting = false;
     startX = startY = endX = endY = -1;
     pause = false;
     history.length = 0;
@@ -288,16 +251,14 @@ export default function gameOfLife(p) {
   }
 
   function reseedAmbient() {
-    probability = Math.floor(18 + Math.random() * 18);
-    setCells(probability);
+    setCells(Math.floor(18 + Math.random() * 18));
     p.loop();
   }
 
   function helpText() {
     if (mode !== 'edit') return '';
-    if (gettingProb) return 'type a percentage, Enter to start';
     if (pasting) return 'PASTE  arrows rotate/flip · click to stamp · Esc done';
-    return `EDIT ${pause ? '(paused)' : '(running)'}  space run/pause · click/drag cells · right-drag copy · p paste · r reseed · c clear · n new · m ambient`;
+    return 'space run/pause · click/drag cells · right-drag copy · p paste · r reseed · c clear · m ambient';
   }
 
   // ---- p5 --------------------------------------------------------------------
@@ -305,7 +266,6 @@ export default function gameOfLife(p) {
   p.setup = () => {
     p.createCanvas(p.windowWidth, p.windowHeight);
     p.frameRate(10);
-    loadFont();
     p.canvas.addEventListener('contextmenu', (e) => e.preventDefault());
     hud = createHud(p.canvas.parentElement);
     const panel = createPanel(p.canvas.parentElement, { title: 'Game of Life', toggleLabel: 'Colors' });
@@ -363,10 +323,6 @@ export default function gameOfLife(p) {
     }
 
     // ---- edit mode (original draw loop)
-    if (gettingProb) {
-      textScreen();
-      return;
-    }
     if (!pause) {
       if (tickToggle % 6 === 0) {
         nextTick();
@@ -375,7 +331,7 @@ export default function gameOfLife(p) {
       tickToggle++;
     }
     displayCells();
-    if (pause && pasting) showPaste();
+    if (pasting) showPaste();
     showSelection();
   };
 
@@ -388,7 +344,7 @@ export default function gameOfLife(p) {
   p.mousePressed = () => {
     enterEdit();
     dragged = false;
-    if (p.mouseButton === p.RIGHT && pause && !pasting) {
+    if (p.mouseButton === p.RIGHT && !pasting) {
       selecting = true;
       [startX, startY] = cellAt(p.mouseX, p.mouseY);
       [endX, endY] = [startX, startY];
@@ -404,12 +360,12 @@ export default function gameOfLife(p) {
   p.mouseDragged = () => {
     lastEditInput = performance.now();
     dragged = true;
-    if (!pause || mode !== 'edit') return;
+    if (mode !== 'edit') return;
     if (selecting) {
       [endX, endY] = cellAt(p.mouseX, p.mouseY);
       return;
     }
-    if (pasting || gettingProb) return;
+    if (pasting) return;
     const [i, j] = cellAt(p.mouseX, p.mouseY);
     if (px !== i || py !== j) {
       cells[idx(i, j)] = drawMode ? 1 : 0;
@@ -428,7 +384,7 @@ export default function gameOfLife(p) {
     }
     if (p.mouseButton === p.LEFT && pasting) {
       paste(p.mouseX, p.mouseY);
-    } else if (p.mouseButton === p.LEFT && pause && !dragged && !gettingProb) {
+    } else if (p.mouseButton === p.LEFT && !dragged) {
       const [i, j] = cellAt(p.mouseX, p.mouseY);
       cells[idx(i, j)] = cells[idx(i, j)] ? 0 : 1;
       dirty = true;
@@ -445,21 +401,6 @@ export default function gameOfLife(p) {
     enterEdit();
     const key = p.key;
 
-    if (gettingProb) {
-      if (p.keyCode === p.ENTER || p.keyCode === p.RETURN) {
-        if (input === '') return false;
-        probability = Number(input);
-        setCells(probability);
-        pause = probability === 0;
-        gettingProb = false;
-      } else if (key >= '0' && key <= '9') {
-        if (Number(input + key) <= 100) input += key;
-      } else if (p.keyCode === p.BACKSPACE || p.keyCode === p.DELETE) {
-        input = input.slice(0, -1);
-      }
-      return false;
-    }
-
     if (pasting) {
       if (p.keyCode === p.ESCAPE) pasting = false;
       else if (copy && p.keyCode === p.LEFT_ARROW) rotateCCW();
@@ -469,22 +410,16 @@ export default function gameOfLife(p) {
 
     switch (key.toLowerCase()) {
       case 'r':
-        setCells(probability);
+        setCells();
         break;
       case 'c':
         cells.fill(0);
         dirty = true;
-        pause = true;
         break;
       case 'p':
         if (copy) {
           pasting = true;
-          pause = true;
         }
-        break;
-      case 'n':
-        gettingProb = true;
-        input = '';
         break;
       case 'm':
         enterAmbient();
