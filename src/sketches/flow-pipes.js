@@ -249,7 +249,7 @@ export default function flowPipes(p) {
           ctx.beginPath();
           // same rim thickness as the straight sections: (pipeW - waterW) / 2
           const capR = pipeW * 0.95 - (pipeW - waterW) / 2;
-          ctx.arc(0, 0, capR * Math.min(1, (c.fill - 0.5) * 2 + 0.3), 0, Math.PI * 2);
+          ctx.arc(0, 0, capR * Math.max(0, Math.min(1, (c.fill - 0.5) * 2 + 0.3)), 0, Math.PI * 2);
           ctx.fill();
         } else {
           ctx.beginPath();
