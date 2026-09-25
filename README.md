@@ -49,6 +49,10 @@ Server log: `~/Library/Logs/interactive-wallpaper.log`.
 
 - **Corner menu** (top right, fades out when idle): the piece dropdown, the Daily Minimal
   grid (▦), and auto-cycle, which switches to a random piece every 5 min – 2 h.
+- **Daily Minimal auto-cycle** (in the ▦ grid): while a Daily Minimal is showing, switches
+  to a random other one on its own interval. It works with global auto-cycle on or off.
+  With both on, the global cycle still moves on to another piece once its interval has
+  passed since it arrived at Daily Minimal.
 - **From a browser tab:** Plash usually doesn't pass clicks through to the page. Open
   `http://localhost:4747` in a normal browser and pick a piece there. The selection is shared
   through the server, so Plash follows within a few seconds. The same goes for L-System settings.

@@ -21,7 +21,13 @@
 
     <div id="dm-grid" class="dm-grid" hidden>
       <div class="dm-panel">
-        <h2>Daily Minimal</h2>
+        <div class="dm-head">
+          <h2>Daily Minimal</h2>
+          <label class="cycle" title="Switch to a random Daily Minimal while one is showing">
+            <input id="dm-cycle" type="checkbox" /> Auto-cycle Daily Minimals
+          </label>
+          <select id="dm-cycle-min" aria-label="Daily Minimal auto-cycle interval"></select>
+        </div>
         <div class="grid"></div>
       </div>
     </div>

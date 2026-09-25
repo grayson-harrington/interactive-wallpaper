@@ -23,6 +23,8 @@ const pick = document.getElementById('pick');
 const gridBtn = document.getElementById('grid-btn');
 const cycleBox = document.getElementById('cycle');
 const cycleMin = document.getElementById('cycle-min');
+const dmCycleBox = document.getElementById('dm-cycle');
+const dmCycleMin = document.getElementById('dm-cycle-min');
 const grid = document.getElementById('dm-grid');
 
 const dmEntry = findEntry(DAILY_MINIMAL);
@@ -74,7 +76,15 @@ function show(rawSel, { share = true } = {}) {
   markGridSelection();
   showCredit(sel);
   document.title = labelFor(sel);
-  if (share) setShared('selection', { ...sel, t: Date.now() });
+  if (share) {
+    // t: last change of any kind (the Daily Minimal cycle's clock).
+    // entryT: last change of top-level piece (the global cycle's clock), so
+    // hopping between Daily Minimals doesn't hold off the global cycle.
+    const prev = getShared('selection');
+    const now = Date.now();
+    const entryT = prev?.id === sel.id ? (prev.entryT ?? prev.t) : now;
+    setShared('selection', { ...sel, t: now, entryT });
+  }
 }
 
 // Every Daily Minimal piece carries its design ID and a credit to the
@@ -150,37 +160,57 @@ window.addEventListener('keydown', (e) => {
 });
 
 // ---- auto-cycle -------------------------------------------------------------
+//
+// Two independent cycles. The global one ("autoCycle") switches to a random
+// other top-level piece. The Daily Minimal one ("dmCycle", toggled in the
+// grid overlay) switches to a random other Daily Minimal while one is
+// showing. Both can be on: the global cycle can land on Daily Minimal, the
+// DM cycle rotates ports from there, and the global cycle moves on once its
+// own interval has passed since it arrived.
 
 const CYCLE_DEFAULT = { on: false, minutes: 15 };
 
-function cycleSettings() {
-  return { ...CYCLE_DEFAULT, ...(getShared('autoCycle') || {}) };
+function cycleSettings(key) {
+  return { ...CYCLE_DEFAULT, ...(getShared(key) || {}) };
 }
 
 function renderCycle() {
-  const s = cycleSettings();
-  cycleBox.checked = s.on;
-  cycleMin.value = String(s.minutes);
-  cycleMin.disabled = !s.on;
+  for (const [key, box, min] of [
+    ['autoCycle', cycleBox, cycleMin],
+    ['dmCycle', dmCycleBox, dmCycleMin],
+  ]) {
+    const s = cycleSettings(key);
+    box.checked = s.on;
+    min.value = String(s.minutes);
+    min.disabled = !s.on;
+  }
 }
 
-for (const m of [5, 10, 15, 30, 60, 120]) {
-  const opt = document.createElement('option');
-  opt.value = String(m);
-  opt.textContent = m < 60 ? `${m} min` : `${m / 60} h`;
-  cycleMin.append(opt);
+// Restart one cycle's interval from now (clock is 't' or 'entryT').
+function restartClock(clock) {
+  setShared('selection', { ...getShared('selection'), ...current, [clock]: Date.now() });
 }
 
-cycleBox.addEventListener('change', () => {
-  setShared('autoCycle', { ...cycleSettings(), on: cycleBox.checked });
-  // restart the interval from now
-  setShared('selection', { ...current, t: Date.now() });
-  renderCycle();
-});
-cycleMin.addEventListener('change', () => {
-  setShared('autoCycle', { ...cycleSettings(), minutes: Number(cycleMin.value) });
-  renderCycle();
-});
+function wireCycle(key, box, min, clock) {
+  for (const m of [5, 10, 15, 30, 60, 120]) {
+    const opt = document.createElement('option');
+    opt.value = String(m);
+    opt.textContent = m < 60 ? `${m} min` : `${m / 60} h`;
+    min.append(opt);
+  }
+  box.addEventListener('change', () => {
+    setShared(key, { ...cycleSettings(key), on: box.checked });
+    restartClock(clock);
+    renderCycle();
+  });
+  min.addEventListener('change', () => {
+    setShared(key, { ...cycleSettings(key), minutes: Number(min.value) });
+    renderCycle();
+  });
+}
+
+wireCycle('autoCycle', cycleBox, cycleMin, 'entryT');
+wireCycle('dmCycle', dmCycleBox, dmCycleMin, 't');
 
 function randomOther(list, notThis) {
   const pool = list.filter((x) => x !== notThis);
@@ -188,13 +218,23 @@ function randomOther(list, notThis) {
 }
 
 function cycleTick() {
-  const s = cycleSettings();
-  if (!s.on || document.hidden || !current) return;
-  const since = Date.now() - (getShared('selection')?.t || 0);
-  if (since < s.minutes * 60_000) return;
-  const next = randomOther(entries, findEntry(current.id));
-  if (next.group) show({ id: next.id, sub: next.group[Math.floor(Math.random() * next.group.length)].id });
-  else show({ id: next.id });
+  if (document.hidden || !current) return;
+  const sel = getShared('selection') || {};
+  const now = Date.now();
+
+  const g = cycleSettings('autoCycle');
+  if (g.on && now - (sel.entryT ?? sel.t ?? 0) >= g.minutes * 60_000) {
+    const next = randomOther(entries, findEntry(current.id));
+    if (next.group) show({ id: next.id, sub: next.group[Math.floor(Math.random() * next.group.length)].id });
+    else show({ id: next.id });
+    return;
+  }
+
+  const d = cycleSettings('dmCycle');
+  if (d.on && current.id === DAILY_MINIMAL && now - (sel.t ?? 0) >= d.minutes * 60_000) {
+    const cur = dmEntry.group.find((x) => x.id === current.sub);
+    show({ id: DAILY_MINIMAL, sub: randomOther(dmEntry.group, cur).id });
+  }
 }
 
 // ---- corner menu visibility ---------------------------------------------
@@ -224,6 +264,7 @@ renderCycle();
 
 subscribe('selection', (sel) => show(sel, { share: false }));
 subscribe('autoCycle', renderCycle);
+subscribe('dmCycle', renderCycle);
 setInterval(cycleTick, 15_000);
 
 // Debug/automation hook (used by scripts/check.mjs and scripts/thumbs.mjs).
