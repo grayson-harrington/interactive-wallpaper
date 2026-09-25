@@ -13,6 +13,7 @@ import S02_437 from './S02-437.js';
 import S02_446 from './S02-446.js';
 import S02_459 from './S02-459.js';
 import S02_474 from './S02-474.js';
+import S02_555 from './S02-555.js';
 import S02_582 from './S02-582.js';
 import IF_004 from './IF-004.js';
 
@@ -28,6 +29,7 @@ export const dailyMinimal = [
   { id: 'S02-446', label: 'S02-446 Controlled Noise', sketch: S02_446 },
   { id: 'S02-459', label: 'S02-459 Simple Cubic', sketch: S02_459 },
   { id: 'S02-474', label: 'S02-474 Popup Lines', sketch: S02_474 },
+  { id: 'S02-555', label: 'S02-555 Quarter Bites', sketch: S02_555 },
   { id: 'S02-582', label: 'S02-582 Wandering Tunnel', sketch: S02_582 },
   { id: 'IF-004', label: 'IF-004 Cube Triangle', sketch: IF_004 },
 ];
