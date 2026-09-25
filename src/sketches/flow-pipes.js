@@ -166,11 +166,21 @@ export default function flowPipes(p) {
         const n = at(c.i + di, c.j + dj);
         return !n || !(n.mask & opp);
       });
-    // candidates: the frontier next to the water, plus watered pipes that
-    // still have a dangling opening - never settled, fully joined pipes
-    let pool = cells.filter(
-      (c) => c.mask !== c.solved && (c.connected ? hasOpenEnd(c) : touchesWater(c)),
-    );
+    // a frontier pipe that a watered pipe has an open arm pointing into -
+    // rotating it to face back is what extends the flow
+    const fedByWater = (c) =>
+      DIRS.some(([, di, dj, opp]) => {
+        const n = at(c.i + di, c.j + dj);
+        return n && n.connected && n.mask & opp;
+      });
+    // candidates: watered pipes that still have a dangling opening, plus the
+    // frontier next to the water (narrowed to pipes a dangling opening
+    // points into, when there are any) - never settled, fully joined pipes
+    const unsolved = cells.filter((c) => c.mask !== c.solved);
+    const incomplete = unsolved.filter((c) => c.connected && hasOpenEnd(c));
+    const frontier = unsolved.filter((c) => !c.connected && touchesWater(c));
+    const fed = frontier.filter(fedByWater);
+    let pool = incomplete.concat(fed.length ? fed : frontier);
     // stuck: some misrotated pipe elsewhere in the water is blocking a branch
     if (!pool.length) pool = cells.filter((c) => c.connected && c.mask !== c.solved);
     if (pool.length) rotate(pool[Math.floor(Math.random() * pool.length)]);
