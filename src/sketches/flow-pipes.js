@@ -6,12 +6,17 @@
 // random rotation. Click a pipe to rotate it clockwise. Pipes connected to the source fill
 // with water, which flows
 // outward piece by piece; disconnecting a pipe drains everything past it.
+// A watered arm that leads nowhere (a wall or a neighbor that doesn't open
+// back) spills: a light trickle of droplets sprays out of its mouth, under
+// the pipes, shrinking and fading as they go, until the arm is joined or
+// drained.
 // When every pipe is connected the board celebrates briefly, then a new
 // puzzle is generated.
 //
 // Ambient mode: an invisible player solves the board slowly, preferring
 // pipes next to the water so the flow visibly spreads.
-// Settings: grid size (cell size) in the panel; remembered per browser.
+// Settings: grid size (cell size) and whether leaks show (on by default; a
+// hint, since it points at misplaced pipes); remembered per browser.
 
 import { createPanel, autoFade } from '../lib/panel.js';
 
@@ -29,8 +34,15 @@ const DIRS = [
 const rotCW = (m) => ((m << 1) | (m >> 3)) & 15;
 
 const SIZE_KEY = 'iw:pipes:cell';
+const LEAKS_KEY = 'iw:pipes:leaks';
 const FILL_RATE = 0.22; // per frame
 const DRAIN_RATE = 0.25;
+const SPILL_GROW = 0.06; // per frame, ~0.5s to full size
+const SPILL_SHRINK = 0.08;
+const DROPS = 6; // droplets per open end
+const DROP_LIFE = 0.8; // seconds from mouth to gone (each droplet varies +-20%)
+const DROP_REACH = 0.3; // cells
+const DROP_SPREAD = 0.7; // max launch angle off the arm, radians (~40deg)
 const SOLVED_HOLD_MS = 5000;
 
 const COLORS = {
@@ -42,8 +54,10 @@ const COLORS = {
 
 export default function flowPipes(p) {
   let cellPx = 64;
+  let showLeaks = true;
   try {
     cellPx = Number(localStorage.getItem(SIZE_KEY)) || cellPx;
+    showLeaks = localStorage.getItem(LEAKS_KEY) !== '0';
   } catch {
     // storage unavailable
   }
@@ -100,6 +114,7 @@ export default function flowPipes(p) {
       c.turns = 0;
       c.fill = 0;
       c.parentDir = null;
+      c.spill = [0, 0, 0, 0]; // spray strength per DIRS index
     }
     solvedAt = 0;
   }
@@ -261,6 +276,49 @@ export default function flowPipes(p) {
     ctx.restore();
   }
 
+  // Droplets spraying out of an open mouth. Stateless: each droplet loops on
+  // its own cycle with a slightly different length and start, so launches
+  // drift in and out of step (bursts and overlaps, not a metronome), and a
+  // hash of (arm, droplet, cycle) gives each launch a fresh angle within the
+  // spread. They slow, shrink and fade fast.
+  const hash = (n) => {
+    const x = Math.sin(n * 127.1) * 43758.5453;
+    return x - Math.floor(x);
+  };
+
+  function drawSpills(ctx, t) {
+    ctx.fillStyle = COLORS.water;
+    const reach = cellPx * DROP_REACH;
+    const r0 = Math.max(1.5, cellPx * 0.045);
+    for (const c of cells) {
+      for (let d = 0; d < 4; d++) {
+        const s = c.spill[d];
+        if (s < 0.01) continue;
+        const [, di, dj] = DIRS[d];
+        const seed = (c.i * 31 + c.j) * 4 + d;
+        const mx = ox + (c.i + 0.5 + di * 0.5) * cellPx;
+        const my = oy + (c.j + 0.5 + dj * 0.5) * cellPx;
+        for (let k = 0; k < DROPS; k++) {
+          const life = DROP_LIFE * (0.8 + 0.4 * hash(seed * 3.1 + k * 5.7));
+          const cycle = t / life + hash(seed + k * 13.3);
+          const n = Math.floor(cycle);
+          const u = cycle - n; // 0 at the mouth -> 1 gone
+          const rnd = hash(seed * 7.3 + k * 1.9 + n * 0.37);
+          const a = (rnd * 2 - 1) * DROP_SPREAD;
+          const dist = reach * (1 - (1 - u) * (1 - u)) * (0.6 + 0.4 * hash(rnd * 91.7));
+          const along = Math.cos(a) * dist;
+          const side = Math.sin(a) * dist;
+          const fade = 1 - u;
+          ctx.globalAlpha = s * fade * fade * fade;
+          ctx.beginPath();
+          ctx.arc(mx + di * along - dj * side, my + dj * along + di * side, r0 * (1 - 0.7 * u), 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+    }
+    ctx.globalAlpha = 1;
+  }
+
   // ---- p5 ------------------------------------------------------------------
 
   p.setup = () => {
@@ -279,6 +337,14 @@ export default function flowPipes(p) {
         // storage unavailable
       }
       generate();
+    });
+    panel.checkbox('Show leaks', showLeaks, (v) => {
+      showLeaks = v;
+      try {
+        localStorage.setItem(LEAKS_KEY, v ? '1' : '0');
+      } catch {
+        // storage unavailable
+      }
     });
     panel.buttons([
       ['New puzzle', generate],
@@ -308,6 +374,19 @@ export default function flowPipes(p) {
       if (c.connected && c.parent && c.parent.fill >= 1) c.fill = Math.min(1, c.fill + FILL_RATE);
       else if (!c.connected) c.fill = Math.max(0, c.fill - DRAIN_RATE);
     }
+    // spills: a full arm open to nothing sprays; anything else tapers off
+    for (const c of cells) {
+      const full = c.fill >= 1 && c.turns === 0;
+      for (let d = 0; d < 4; d++) {
+        const [bit, di, dj, opp] = DIRS[d];
+        let open = false;
+        if (full && c.mask & bit && bit !== c.parentDir) {
+          const n = at(c.i + di, c.j + dj);
+          open = !n || !(n.mask & opp);
+        }
+        c.spill[d] = open ? Math.min(1, c.spill[d] + SPILL_GROW) : Math.max(0, c.spill[d] - SPILL_SHRINK);
+      }
+    }
     // rotation animation
     for (const c of cells) {
       if (c.turns !== 0) c.turns = Math.abs(c.turns) < 0.05 ? 0 : c.turns * 0.6;
@@ -315,6 +394,7 @@ export default function flowPipes(p) {
 
     p.background(COLORS.bg);
     const ctx = p.drawingContext;
+    if (showLeaks) drawSpills(ctx, performance.now() / 1000); // under the pipes
     for (const c of cells) drawCell(ctx, c);
 
     if (solvedAt) {
