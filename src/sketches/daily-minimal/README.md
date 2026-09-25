@@ -105,6 +105,10 @@ Other things to know:
   `title`, and the `ported` date. The date is blank for ports made before this
   file existed. Its `id`, `folder` and `file` columns match `rename_manifest.csv`,
   so the two can be joined to see what's left.
+- The app shell labels every piece in the bottom-left corner with its ID and
+  "Daily Minimal by Pierre Voisin" (`showCredit` in `src/main.js`, styled by
+  `.dm-credit`). It uses the piece's id, so new ports get it automatically.
+  Don't draw a credit inside the sketch.
 - See [CONTRIBUTING.md](../../../CONTRIBUTING.md) for the lifecycle contract,
   ambient vs. interactive modes, and controls/panels.
 

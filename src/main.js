@@ -18,6 +18,7 @@ const showUi = params.get('ui') !== '0';
 
 const stages = document.getElementById('stages');
 const ui = document.getElementById('ui');
+const dmCredit = document.getElementById('dm-credit');
 const pick = document.getElementById('pick');
 const gridBtn = document.getElementById('grid-btn');
 const cycleBox = document.getElementById('cycle');
@@ -71,8 +72,16 @@ function show(rawSel, { share = true } = {}) {
   pick.value = sel.id;
   gridBtn.hidden = sel.id !== DAILY_MINIMAL;
   markGridSelection();
+  showCredit(sel);
   document.title = labelFor(sel);
   if (share) setShared('selection', { ...sel, t: Date.now() });
+}
+
+// Every Daily Minimal piece carries its design ID and a credit to the
+// original designer in the bottom-left corner.
+function showCredit(sel) {
+  dmCredit.hidden = sel.id !== DAILY_MINIMAL;
+  if (!dmCredit.hidden) dmCredit.textContent = `${sel.sub} · Daily Minimal by Pierre Voisin`;
 }
 
 function labelFor(sel) {

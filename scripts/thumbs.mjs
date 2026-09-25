@@ -7,6 +7,7 @@ const browser = await chromium.launch({ args: ['--use-angle=swiftshader', '--ena
 const page = await browser.newPage({ viewport: { width: 640, height: 400 }, deviceScaleFactor: 1 });
 await page.goto(`${BASE}/?follow=0&ui=0&mode=ambient`);
 await page.waitForFunction(() => window.__wallpaper);
+await page.addStyleTag({ content: '.dm-credit { display: none !important; }' }); // the grid shows the ID already
 const keys = (await page.evaluate(() => window.__wallpaper.keys())).filter((k) => k.startsWith('dm:'));
 for (const key of keys) {
   const sub = key.slice(3);

@@ -393,3 +393,18 @@ body {
   right: 12px;
   bottom: 12px;
 }
+
+/* Daily Minimal ID + credit. `difference` keeps it readable on light and dark pieces. */
+.dm-credit {
+  position: fixed;
+  z-index: 40;
+  left: 16px;
+  bottom: 14px;
+  font: 11px/1.4 ui-monospace, 'SF Mono', Menlo, monospace;
+  letter-spacing: 0.04em;
+  color: #fff;
+  mix-blend-mode: difference;
+  opacity: 0.5;
+  pointer-events: none;
+  user-select: none;
+}
