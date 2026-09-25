@@ -1,6 +1,7 @@
 # Interactive Wallpaper
 
-Personal creative-coding pieces (Processing/Python originals ported to p5.js),
+A growing, actively developed collection of animated, interactive p5.js pieces
+(new work plus ports of older Processing/Python projects and Daily Minimal designs),
 served by a local Node server so [Plash](https://sindresorhus.com/plash) shows them
 as a live macOS desktop background. Vite builds `src/` into `dist/`. A dependency-free
 server (`server/server.mjs`, launchd agent on port 4747) serves `dist/` plus live image

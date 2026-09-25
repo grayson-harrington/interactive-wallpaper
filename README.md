@@ -1,9 +1,10 @@
 # Interactive Wallpaper
 
-About a decade of my Processing and Python creative-coding projects, ported to p5.js and
-served locally so [Plash](https://sindresorhus.com/plash) can show them as a live macOS
-desktop background. A menu in the corner picks which piece is showing, and only that
-piece runs.
+A growing collection of animated, interactive p5.js pieces, served locally so
+[Plash](https://sindresorhus.com/plash) can show them as a live macOS desktop background.
+Some are ports of my older Processing and Python projects and some are new work, and
+the collection keeps changing. A menu in the corner picks which piece is showing, and
+only that piece runs.
 
 ## The pieces
 
