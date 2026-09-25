@@ -1,5 +1,6 @@
 // Renders public/thumbs/<id>.png for the Daily Minimal grid.
 //   npm run serve  (in another terminal), then npm run thumbs, then npm run build
+//   ONLY=S02-582,IF-004 npm run thumbs   renders just those pieces
 import { chromium } from 'playwright';
 
 const BASE = process.env.BASE || 'http://localhost:4747';
@@ -9,8 +10,10 @@ await page.goto(`${BASE}/?follow=0&ui=0&mode=ambient`);
 await page.waitForFunction(() => window.__wallpaper);
 await page.addStyleTag({ content: '.dm-credit { display: none !important; }' }); // the grid shows the ID already
 const keys = (await page.evaluate(() => window.__wallpaper.keys())).filter((k) => k.startsWith('dm:'));
+const only = process.env.ONLY ? process.env.ONLY.split(',') : null;
 for (const key of keys) {
   const sub = key.slice(3);
+  if (only && !only.includes(sub)) continue;
   await page.evaluate((s) => window.__wallpaper.show({ id: 'daily-minimal', sub: s }), sub);
   await page.waitForTimeout(sub === 'S02-474' ? 1500 : 3500);
   await page.screenshot({ path: `public/thumbs/${sub}.png` });

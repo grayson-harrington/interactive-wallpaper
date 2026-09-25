@@ -114,80 +114,37 @@ Other things to know:
 
 ## Workflow for a new animated version
 
-Take one image at a time. Don't write any code until steps 1 to 3 are done and the
-project owner has confirmed each one.
+The full procedure is the project skill
+[port-daily-minimal](../../../.claude/skills/port-daily-minimal/SKILL.md).
+Agents load it when asked to port a design. In short:
 
-### 1. Find and read the image
+1. Find the image, check `ported.csv`, and open it.
+2. Measure it with the skill's `measure.py`, describe it in text, and get the
+   owner's confirmation.
+3. Ask the owner, with multiple-choice questions, how it should animate and
+   whether and how it should be interactive.
+4. Build it with `dmSketch()`, starting from the original as the rest pose.
+   Register it in `index.js` and `ported.csv`.
+5. Overlay the rest pose on the original (`shot.mjs` + `overlay.py`), tune, then
+   run `ONLY=<ID> npm run thumbs`, `npm run build` and `npm run check`, and review
+   it with the owner.
 
-The owner names a piece (e.g. "S01-512" or "that circle one with the bands").
-Find it under the downloads folder, checking every board. Open it with the
-Read tool so you actually see it, and look up its row in `rename_manifest.csv`
-for the title and caption.
-
-### 2. Describe it back in text and get it confirmed
-
-Before proposing anything, write a precise description of the static image so
-the owner can confirm or correct how you read it. Include:
-
-- **Canvas**: aspect ratio, estimated pixel size, background color.
-- **Palette**: every color, with approximate hex values.
-- **Elements**: each shape or group, with count, size, position and orientation,
-  relative to the canvas (e.g. "8 concentric bands, each ~25px wide, alternating
-  dark/light, centered").
-- **Structure**: the rule that generates the image (grid, recursion, rotation
-  symmetry, nesting, overlap/masking, even-odd fill) and anything that repeats.
-- **Illusions and tricks**: implied 3D, impossible geometry, negative space.
-- **Uncertainties**: anything you can't make out. Say it plainly rather than guessing.
-
-Wait for confirmation. If the owner corrects anything, revise the description
-and confirm again.
-
-### 3. Ask how it should move, then how it should respond
-
-Use the AskUserQuestion tool. Ask **one question for animation and one for
-interactivity**. Each should give 2–4 concrete options specific to *this* image,
-not generic ones. Put the option you recommend first and mark it
-"(Recommended)". The owner can always pick "Other" and write in their own idea.
-
-**Animation.** Base the options on the structure found in step 2. Examples:
+### Ideas for motion
 
 - Rotate nested elements at different rates (like `S02-404`).
+- Move the vanishing point or viewpoint (like `S02-582`).
 - Build the image up stroke by stroke, hold it, then take it apart.
 - Morph a parameter (count, spacing, angle) back and forth through the design.
 - Move a wave, noise field or light source through the shapes.
 - Let particles or trails flow inside the shape's bounds (like `S02-437`).
 
-**Interactivity.** Examples:
+### Ideas for interaction
 
-- The mouse position controls the main parameter (angle, spacing, phase).
+- The mouse position controls the main parameter (angle, spacing, phase, viewpoint).
 - Click to reseed or restart, or to step to the next variation.
 - Drag to rotate or reposition an element.
 - Keys switch modes or palettes.
 - None: ambient only.
 
-If the answers leave open questions (speed, loop length, whether the original
-still frame should appear at some point in the loop), ask a short follow-up
-round the same way.
-
 Every interactive piece still needs an ambient mode that looks intentional
-without input, because Plash may not forward the mouse. Use `S.live` or
-`p.interactive()` to switch between them, and a wandering stand-in for the
-mouse where that fits. See CONTRIBUTING.md.
-
-### 4. Build
-
-- Match the original first. The still image should be a recognizable frame of
-  the animation, with the same palette, proportions and composition.
-- Set `ow`/`oh` to the original's aspect ratio and draw in those coordinates.
-- Keep motion calm and loopable. This runs as a desktop wallpaper all day.
-- Add a header comment with the ID, title, and a one-line description of the
-  motion, like the existing ports.
-- Register it in `index.js` in ID order and add its row to `ported.csv`.
-- Run `npm run thumbs`, `npm run build` and `npm run check`, then reload Plash.
-  `npm run thumbs` re-renders every thumbnail, so discard changes to thumbnails
-  of other pieces before committing.
-
-### 5. Review
-
-Show the owner the result next to the original (screenshot plus image path).
-Tweak until they're happy, then commit the port and its thumbnail together.
+without input, because Plash may not forward the mouse.

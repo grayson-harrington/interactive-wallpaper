@@ -13,7 +13,7 @@ piece runs.
 | Voronoi Images | Photos rebuilt from Voronoi cells. Click: next image · right-click: pick a file · adjustable cell count |
 | Procedural Terrain | A sea of generated islands with biome coloring, rising tile by tile |
 | Tree Patterns | A branching tree grown by colored-node rules, with an adjuster panel and color legend |
-| Daily Minimal | 13 small animated pieces, chosen from a thumbnail grid |
+| Daily Minimal | Animated ports of Daily Minimal designs, chosen from a thumbnail grid |
 | Bicycle Galaxy | A stationary bike whose rotating parts leave trails, as if it were riding forward |
 | Game of Life | Self-reseeding soup; click or type to use the full editor (paint, copy/paste, colors) |
 | Space Blocks | Gravity-pool game that plays itself until you take over |
@@ -84,7 +84,7 @@ starts empty. To keep images elsewhere, set `WALLPAPER_DIR` / `VORONOI_DIR` in t
 | `npm run dev` | Vite dev server (http://localhost:5173) + API server. Stop the agent first, or set `PORT` |
 | `npm run serve` | run the production server by hand |
 | `npm run check` | headless smoke test of every piece (errors, lifecycle, screenshots); `BROWSER=webkit` tests Plash's engine |
-| `npm run thumbs` | regenerate the Daily Minimal thumbnails (server must be running) |
+| `npm run thumbs` | regenerate the Daily Minimal thumbnails (server must be running; `ONLY=<id>,...` for some) |
 | `npm run install-agent` / `uninstall-agent` | manage the launchd agent |
 
 ## Layout
@@ -94,7 +94,7 @@ starts empty. To keep images elsewhere, set `WALLPAPER_DIR` / `VORONOI_DIR` in t
   and `/api/state` holds the shared state.
 - `src/shell/`: the host lifecycle, the registry of pieces, and state sync. Every sketch is
   instantiated up front, only the active one loops, and hidden ones are `display: none`.
-- `src/sketches/`: one module per piece. `daily-minimal/` holds the 12 Daily Minimal ports and their harness.
+- `src/sketches/`: one module per piece. `daily-minimal/` holds the Daily Minimal ports and their harness.
 - `src/lib/`: shared helpers (input tracking, control panels, paper textures).
 
 Adding or changing a piece: see [CONTRIBUTING.md](CONTRIBUTING.md).
