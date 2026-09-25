@@ -10,32 +10,40 @@
 // parent branch. Unconnected nodes shrink away; finished red paths are traced
 // back to the root in red.
 //
-// Ambient: grows a tree, holds it for a while, grows a new one.
+// Drawn as ink on warm paper with muted node colors, and the defaults are
+// tuned so the tree spreads across most of the screen.
+//
+// Ambient: grows a tree, holds it for a while, fades it into the paper, grows
+// a new one.
 // Interactive: the original's adjuster screen is a control panel (press "a" or
 // use the Controls button); Enter or a click grows a new tree. Settings are
 // remembered in browser storage.
 
 import { createPanel, autoFade } from '../lib/panel.js';
+import { paperCanvas } from '../lib/paper.js';
+
+const PAPER = [239, 233, 221];
+const INK = '#3a3631';
 
 const COLORS = {
-  white: '#FFFFFF',
-  red: '#FF4040',
-  yellow: '#FEFF40',
-  blue: '#4051FF',
-  orange: '#FFB640',
+  white: '#fbf8f1',
+  red: '#b8503c',
+  yellow: '#d9ae45',
+  blue: '#4f6f94',
+  orange: '#d18a4f',
 };
 
 const DEFAULTS = {
   whiteProb: 57,
-  redProb: 7,
-  yellowProb: 9,
-  blueProb: 13,
-  orangeProb: 14,
+  redProb: 6,
+  yellowProb: 6,
+  blueProb: 17,
+  orangeProb: 11,
   minD: 15,
   minSize: 20,
   maxSize: 55,
-  maxBranchLength: 55,
-  minAngle: 15,
+  maxBranchLength: 65,
+  minAngle: 8,
   childParentAngle: 95,
   minDistanceFromBranch: 5,
   fadeSpeed: 1, // px per frame the unconnected nodes shrink
@@ -66,6 +74,7 @@ const LEGEND = [
 ];
 
 const HOLD_MS = 45_000;
+const FADE_MS = 2500;
 const STORAGE_KEY = 'iw:tree-patterns';
 
 const random = (a, b) => a + Math.random() * (b - a);
@@ -138,6 +147,8 @@ export default function treePatterns(p) {
   let reds = [];
   let finished = false;
   let holdScheduled = false;
+  let fadeStart = -1; // >= 0 while the finished tree fades into the paper
+  let paper; // offscreen paper texture at device resolution
   let k = 1; // px scale vs. the original 850px-tall canvas
   let panel;
   let warning;
@@ -197,7 +208,7 @@ export default function treePatterns(p) {
       const node = makeNode(color, x, y, s);
       if (nodes.length === 0) {
         node.connected = true;
-        node.numChildren = Math.floor(random(2, 5));
+        node.numChildren = Math.floor(random(3, 6));
         reds.push(node);
         nodes.push(node);
         currentGeneration.push(node);
@@ -312,8 +323,46 @@ export default function treePatterns(p) {
 
   function regenerate() {
     p.cancelScheduled();
+    fadeStart = -1;
     initiateMap();
     p.loop();
+  }
+
+  function startFade() {
+    fadeStart = performance.now();
+    p.loop();
+  }
+
+  function buildPaper() {
+    const d = p.pixelDensity();
+    paper = paperCanvas(p.width * d, p.height * d, { base: PAPER, grainAlpha: [6, 14], specks: Math.round((p.width * p.height) / 2000) });
+  }
+
+  // Paper, then the tree at `alpha` (1 while growing, lower while fading).
+  function paint(alpha) {
+    const ctx = p.drawingContext;
+    ctx.save();
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.drawImage(paper, 0, 0);
+    ctx.restore();
+    if (alpha <= 0) return;
+    ctx.globalAlpha = alpha;
+    const w = Math.max(0.75, k);
+    p.stroke(INK);
+    p.strokeWeight(2.5 * w);
+    showBranches(nodes[0]);
+    if (nextGeneration.length === 0) {
+      p.stroke(COLORS.red);
+      p.strokeWeight(4 * w);
+      for (const red of reds) if (red.connected) connectReds(red);
+    }
+    p.stroke(INK);
+    p.strokeWeight(1.25 * w);
+    for (const node of nodes) {
+      p.fill(COLORS[node.color]);
+      p.circle(node.x, node.y, node.s);
+    }
+    ctx.globalAlpha = 1;
   }
 
   // ---- controls ----------------------------------------------------------
@@ -325,6 +374,8 @@ export default function treePatterns(p) {
   function buildPanel() {
     const parent = p.canvas.parentElement;
     panel = createPanel(parent, { title: 'Tree Patterns', toggleLabel: 'Adjust tree (a)' });
+    panel.toggle.classList.add('corner-br');
+    panel.el.classList.add('corner-br');
     const legend = document.createElement('div');
     legend.className = 'legend';
     legend.innerHTML =
@@ -375,35 +426,35 @@ export default function treePatterns(p) {
     p.createCanvas(p.windowWidth, p.windowHeight);
     p.frameRate(30);
     buildPanel();
+    buildPaper();
     initiateMap();
   };
 
   p.draw = () => {
+    if (fadeStart >= 0) {
+      const t = Math.min(1, (performance.now() - fadeStart) / FADE_MS);
+      paint(1 - t * t * (3 - 2 * t));
+      if (t >= 1) {
+        fadeStart = -1;
+        initiateMap();
+      }
+      return;
+    }
+
     if (finished) {
       if (!holdScheduled) {
         holdScheduled = true;
-        p.schedule(regenerate, HOLD_MS);
+        p.schedule(startFade, HOLD_MS);
       }
       p.noLoop();
       return;
     }
 
-    p.background(0);
     buildTree();
-    p.stroke(255);
-    p.strokeWeight(4 * Math.max(0.75, k));
-    showBranches(nodes[0]);
-    if (nextGeneration.length === 0) {
-      p.stroke(COLORS.red);
-      p.strokeWeight(6 * Math.max(0.75, k));
-      for (const red of reds) if (red.connected) connectReds(red);
-    }
+    paint(1);
 
-    p.noStroke();
     let shrinking = 0;
     nodes = nodes.filter((node) => {
-      p.fill(COLORS[node.color]);
-      p.circle(node.x, node.y, node.s);
       if (!node.connected) {
         node.s -= settings.fadeSpeed;
         shrinking++;
@@ -434,6 +485,7 @@ export default function treePatterns(p) {
 
   p.windowResized = () => {
     p.resizeCanvas(p.windowWidth, p.windowHeight);
+    buildPaper();
     regenerate();
   };
 }
