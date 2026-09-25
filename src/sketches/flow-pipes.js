@@ -173,16 +173,20 @@ export default function flowPipes(p) {
         const n = at(c.i + di, c.j + dj);
         return n && n.connected && n.mask & opp;
       });
-    // candidates: watered pipes that still have a dangling opening, plus the
-    // frontier next to the water (narrowed to pipes a dangling opening
-    // points into, when there are any) - never settled, fully joined pipes
+    // candidates, in priority order (never settled, fully joined pipes):
+    // 1. frontier pipes a dangling opening points into
+    // 2. watered pipes that still have a dangling opening
+    // 3. any frontier pipe next to the water
+    // 4. stuck: some misrotated pipe elsewhere in the water is blocking a branch
     const unsolved = cells.filter((c) => c.mask !== c.solved);
-    const incomplete = unsolved.filter((c) => c.connected && hasOpenEnd(c));
-    const frontier = unsolved.filter((c) => !c.connected && touchesWater(c));
-    const fed = frontier.filter(fedByWater);
-    let pool = incomplete.concat(fed.length ? fed : frontier);
-    // stuck: some misrotated pipe elsewhere in the water is blocking a branch
-    if (!pool.length) pool = cells.filter((c) => c.connected && c.mask !== c.solved);
+    const tiers = [
+      () => unsolved.filter((c) => !c.connected && fedByWater(c)),
+      () => unsolved.filter((c) => c.connected && hasOpenEnd(c)),
+      () => unsolved.filter((c) => !c.connected && touchesWater(c)),
+      () => unsolved.filter((c) => c.connected),
+    ];
+    let pool = [];
+    for (const tier of tiers) if ((pool = tier()).length) break;
     if (pool.length) rotate(pool[Math.floor(Math.random() * pool.length)]);
   }
 
