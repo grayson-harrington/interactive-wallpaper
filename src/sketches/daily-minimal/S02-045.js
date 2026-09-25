@@ -1,4 +1,4 @@
-// dm045 waves through circle
+// S02-045 waves through circle
 // Two sine waves scroll through a ring; a small hollow circle rides each wave.
 import { dmSketch } from './harness.js';
 

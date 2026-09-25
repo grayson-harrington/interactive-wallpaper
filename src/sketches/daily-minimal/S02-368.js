@@ -1,4 +1,4 @@
-// dm368 rectangles in circle
+// S02-368 rectangles in circle
 // Seeds grow into paper rectangles until they bump into each other, seen
 // through a circular window. The original's per-frame random 1px grain is
 // replayed from a few pre-rendered grain layers (same shimmer, far cheaper).

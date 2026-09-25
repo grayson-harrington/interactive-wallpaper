@@ -36,7 +36,7 @@ export const entries = [
   { id: 'l-system', label: 'L-System Tool', sketch: lSystem },
 ];
 
-export const DEFAULT_SELECTION = { id: DAILY_MINIMAL, sub: 'dm404' };
+export const DEFAULT_SELECTION = { id: DAILY_MINIMAL, sub: 'S02-404' };
 
 export function findEntry(id) {
   return entries.find((e) => e.id === id);

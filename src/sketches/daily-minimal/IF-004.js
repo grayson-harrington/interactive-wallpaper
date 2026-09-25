@@ -1,4 +1,4 @@
-// dmif04 cube triangle
+// IF-004 cube triangle
 // An impossible triangle built from paper-textured isometric cubes, slowly
 // rotating. Processing's texture() with uv == xy is reproduced by clipping
 // each face and drawing the paper texture in the same coordinates.

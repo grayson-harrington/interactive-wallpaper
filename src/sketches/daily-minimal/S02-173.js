@@ -1,4 +1,4 @@
-// dm173 max line segments
+// S02-173 max line segments
 // Points drift around a circle; every frame they are paired up so the total
 // length of the connecting chords is as large as possible.
 // Keys: UP adds two points, DOWN removes two, P pauses.

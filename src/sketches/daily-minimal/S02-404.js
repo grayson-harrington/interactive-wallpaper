@@ -1,4 +1,4 @@
-// dm404 rotating concentric circles
+// S02-404 rotating concentric circles
 // Three sets of alternating bands, each rotating and carried around by the
 // one outside it.
 import { dmSketch } from './harness.js';

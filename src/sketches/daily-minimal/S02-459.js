@@ -1,4 +1,4 @@
-// dm459 simple cubic
+// S02-459 simple cubic
 // A simple-cubic unit cell of paper "bobbles" joined by knocked-out bonds.
 // Grab a bobble and it springs back when released. In ambient mode an
 // invisible hand occasionally plucks one.

@@ -1,4 +1,4 @@
-// dm446 controlled noise
+// S02-446 controlled noise
 // Five noisy rings drawn on top of each other. The noise only shows up near
 // the mouse; in ambient mode a slowly wandering point stands in for it.
 // Keys: UP adds a ring, DOWN removes one.

@@ -1,4 +1,4 @@
-// dm181 glimpse beyond
+// S02-181 glimpse beyond
 // Two diamonds slide along a line; where they overlap, a window of dark paper
 // opens up.
 import { dmSketch } from './harness.js';

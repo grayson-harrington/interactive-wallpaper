@@ -1,4 +1,4 @@
-// dm401 lines through circle
+// S02-401 lines through circle
 // Light bars accelerate across a dark paper disc. The original pointed the
 // flow away from the mouse; in ambient mode the direction turns slowly.
 import { dmSketch } from './harness.js';

@@ -1,4 +1,4 @@
-// dm474 popup lines
+// S02-474 popup lines
 // Fifty random lines inside a circle; twice a second the oldest disappears
 // and a new one pops up.
 import { dmSketch } from './harness.js';

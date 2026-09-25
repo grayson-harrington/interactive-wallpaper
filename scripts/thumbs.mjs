@@ -11,7 +11,7 @@ const keys = (await page.evaluate(() => window.__wallpaper.keys())).filter((k) =
 for (const key of keys) {
   const sub = key.slice(3);
   await page.evaluate((s) => window.__wallpaper.show({ id: 'daily-minimal', sub: s }), sub);
-  await page.waitForTimeout(sub === 'dm474' ? 1500 : 3500);
+  await page.waitForTimeout(sub === 'S02-474' ? 1500 : 3500);
   await page.screenshot({ path: `public/thumbs/${sub}.png` });
   console.log('thumb', sub);
 }

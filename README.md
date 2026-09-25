@@ -13,7 +13,7 @@ piece runs.
 | Voronoi Images | Photos rebuilt from Voronoi cells. Click: next image · right-click: pick a file · adjustable cell count |
 | Procedural Terrain | A sea of generated islands with biome coloring, rising tile by tile |
 | Tree Patterns | A branching tree grown by colored-node rules, with an adjuster panel and color legend |
-| Daily Minimal | 12 small animated pieces, chosen from a thumbnail grid |
+| Daily Minimal | 13 small animated pieces, chosen from a thumbnail grid |
 | Bicycle Galaxy | A stationary bike whose rotating parts leave trails, as if it were riding forward |
 | Game of Life | Self-reseeding soup; click or type to use the full editor (paint, copy/paste, colors) |
 | Space Blocks | Gravity-pool game that plays itself until you take over |

@@ -1,4 +1,4 @@
-// dm238 fractal cube
+// S02-238 fractal cube
 // A slowly tumbling cube of paper-textured faces. Each iteration replaces
 // every box with the 20 sub-boxes of a Menger sponge step (depth 1-3).
 // The original iterated on click (still does); in ambient mode it iterates on
@@ -28,7 +28,7 @@ function subdivide(boxes) {
   return out;
 }
 
-export default function dm238(p) {
+export default function fractalCube(p) {
   let textures;
   let geoms = [];
   let depth = 1;

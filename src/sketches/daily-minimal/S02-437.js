@@ -1,4 +1,4 @@
-// dm437 trails in triangle
+// S02-437 trails in triangle
 // Concentric comet trails orbiting at different speeds, seen through a
 // triangular window. Thousands of small squares per frame, so they are drawn
 // with the raw canvas API and precomputed colors.
