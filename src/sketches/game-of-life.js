@@ -17,7 +17,7 @@
 
 import { createHud, createPanel, autoFade } from '../lib/panel.js';
 
-const DEFAULT_COLOR = '#0cf20a'; // the original's color(12, 242, 10)
+const DEFAULT_COLOR = '#5a8a58'; // muted from the original's neon color(12, 242, 10)
 const COLOR_KEY = 'iw:gol:color';
 const CELL = 10;
 const EDIT_IDLE_MS = 120_000;
@@ -106,7 +106,7 @@ export default function gameOfLife(p) {
     grid.height = p.height * d;
     const g = grid.getContext('2d');
     g.scale(d, d);
-    g.strokeStyle = 'rgb(50,50,50)';
+    g.strokeStyle = 'rgb(28,28,28)';
     g.lineWidth = 1;
     g.beginPath();
     for (let i = 0; i <= numX; i++) {
@@ -322,7 +322,7 @@ export default function gameOfLife(p) {
       }
     });
     panel.buttons([
-      ['Original green', () => {
+      ['Default color', () => {
         alive = DEFAULT_COLOR;
         panel.el.querySelector('input[type=color]').value = alive;
         localStorage.removeItem(COLOR_KEY);
