@@ -7,7 +7,6 @@ import treePatterns from '../sketches/tree-patterns.js';
 import { dailyMinimal } from '../sketches/daily-minimal/index.js';
 import bicycleGalaxy from '../sketches/bicycle-galaxy.js';
 import gameOfLife from '../sketches/game-of-life.js';
-import spaceBlocks from '../sketches/space-blocks.js';
 import flowPipes from '../sketches/flow-pipes.js';
 import quadTree from '../sketches/quad-tree.js';
 import flocking from '../sketches/flocking.js';
@@ -26,7 +25,6 @@ export const entries = [
   { id: DAILY_MINIMAL, label: 'Daily Minimal', group: dailyMinimal },
   { id: 'bicycle-galaxy', label: 'Bicycle Galaxy', sketch: bicycleGalaxy },
   { id: 'game-of-life', label: 'Game of Life', sketch: gameOfLife },
-  { id: 'space-blocks', label: 'Space Blocks', sketch: spaceBlocks },
   { id: 'flow-pipes', label: 'Flow Pipes', sketch: flowPipes },
   { id: 'quad-tree', label: 'Quad Tree', sketch: quadTree },
   { id: 'flocking', label: 'Flocking', sketch: flocking },

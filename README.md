@@ -17,7 +17,6 @@ only that piece runs.
 | Daily Minimal | Animated ports of Daily Minimal designs, chosen from a thumbnail grid |
 | Bicycle Galaxy | A stationary bike whose rotating parts leave trails, as if it were riding forward |
 | Game of Life | Self-reseeding soup; click or type to use the full editor (paint, copy/paste, colors) |
-| Space Blocks | Gravity-pool game that plays itself until you take over |
 | Flow Pipes | Rotate-the-pipes puzzle with flowing water; solves itself in ambient mode |
 | Quad Tree | A quadtree subdividing live, with a range query following the mouse or a slow path |
 | Flocking | Boids (separation, alignment, cohesion); click to add a boid |

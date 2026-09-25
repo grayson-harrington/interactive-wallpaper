@@ -80,7 +80,7 @@ that runs without any input:
   - `createHud` for a one-line key bar.
   - `autoFade([...elements])` so they disappear when no one is using the page.
 - Put per-piece panels in the bottom-right corner (`corner-br` class), like Game of Life,
-  Space Blocks, Flow Field and Flow Pipes. The top-right corner is the shell's menu.
+  Flow Field and Flow Pipes. The top-right corner is the shell's menu.
 - Remember per-browser settings in `localStorage` under an `iw:<piece>:` key, inside `try/catch`.
   Settings that should follow the user from a browser tab into Plash go through
   `getShared`/`setShared` in `src/shell/sync.js` instead (see the L-System piece).
