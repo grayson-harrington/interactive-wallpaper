@@ -12,7 +12,10 @@
 //
 // The grid is ~5px per cell, rendered as a small image scaled up with
 // smoothing so domains look like soft blobs rather than squares.
-// Interactive: click to reseed.
+// Interactive: click to reseed. A settings panel can binarize the view,
+// thresholding the field at 0 into pure black/white phases.
+
+import { createPanel, autoFade } from '../lib/panel.js';
 
 const CELL = 5;
 const D = 0.6;
@@ -23,6 +26,7 @@ const NSTEP = 2000;
 const STEPS_PER_FRAME = 3;
 const SETTLED = 2e-4; // mean |change| per step
 const HOLD_MS = 5 * 60_000;
+const BINARY_KEY = 'iw:spinodal:binary';
 
 export default function spinodal(p) {
   let nx;
@@ -36,6 +40,12 @@ export default function spinodal(p) {
   let buffer;
   let bufCtx;
   let image;
+  let binary = false;
+  try {
+    binary = localStorage.getItem(BINARY_KEY) === '1';
+  } catch {
+    // storage unavailable
+  }
 
   function seed() {
     nx = Math.max(8, Math.round(p.width / CELL));
@@ -95,7 +105,7 @@ export default function spinodal(p) {
   function render() {
     const d = image.data;
     for (let k = 0; k < curr.length; k++) {
-      const v = Math.max(0, Math.min(255, ((curr[k] + 1) / 2) * 255));
+      const v = binary ? (curr[k] >= 0 ? 255 : 0) : Math.max(0, Math.min(255, ((curr[k] + 1) / 2) * 255));
       d[k * 4] = d[k * 4 + 1] = d[k * 4 + 2] = v;
       d[k * 4 + 3] = 255;
     }
@@ -109,8 +119,32 @@ export default function spinodal(p) {
   p.setup = () => {
     p.createCanvas(p.windowWidth, p.windowHeight);
     p.frameRate(30);
+    const panel = createPanel(p.canvas.parentElement, { title: 'Spinodal Decomposition', toggleLabel: 'Settings' });
+    panel.toggle.classList.add('corner-br');
+    panel.el.classList.add('corner-br');
+    panel.checkbox('Binarize', binary, (v) => {
+      binary = v;
+      render(); // the sim may be holding with noLoop
+      try {
+        localStorage.setItem(BINARY_KEY, v ? '1' : '0');
+      } catch {
+        // storage unavailable
+      }
+    });
+    panel.buttons([
+      ['Reseed', () => restart()],
+      ['Hide', () => panel.hide()],
+    ]);
+    panel.note('Binarize thresholds the field at zero, showing each phase as pure black or white. Click the drawing to reseed.');
+    autoFade([panel.el, panel.toggle], 10_000);
     seed();
   };
+
+  function restart() {
+    p.cancelScheduled();
+    seed();
+    p.loop();
+  }
 
   p.draw = () => {
     if (done) {
@@ -135,11 +169,7 @@ export default function spinodal(p) {
     holdScheduled = false;
   };
 
-  p.mouseClicked = () => {
-    p.cancelScheduled();
-    seed();
-    p.loop();
-  };
+  p.mouseClicked = () => restart();
 
   p.windowResized = () => {
     p.resizeCanvas(p.windowWidth, p.windowHeight);

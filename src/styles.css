@@ -233,6 +233,17 @@ body {
   font-size: 12px;
 }
 
+.sk-panel .row.check {
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  cursor: pointer;
+}
+
+.sk-panel input[type='checkbox'] {
+  margin: 0;
+  accent-color: var(--ui-accent);
+}
+
 .sk-panel input[type='text'],
 .sk-panel textarea,
 .sk-panel select,

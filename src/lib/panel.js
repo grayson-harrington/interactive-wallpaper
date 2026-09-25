@@ -136,6 +136,15 @@ export function createPanel(parent, { title, toggleLabel = 'Controls', open = fa
       input.addEventListener('change', () => onChange(input.value));
       return input;
     },
+    checkbox(label, value, onChange) {
+      const input = document.createElement('input');
+      input.type = 'checkbox';
+      input.checked = value;
+      const { row } = panel.row(label, input);
+      row.classList.add('check');
+      input.addEventListener('change', () => onChange(input.checked));
+      return input;
+    },
     color(label, value, onChange) {
       const input = document.createElement('input');
       input.type = 'color';
