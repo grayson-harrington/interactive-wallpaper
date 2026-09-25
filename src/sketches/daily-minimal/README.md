@@ -17,8 +17,14 @@ A few Série 2 pieces (e.g. S02-073, S02-085) were animated by
 **David Rubio of Neutro studio** ([weareneutro.com](https://www.weareneutro.com)).
 Credit Neutro studio too if one of those is ported.
 
-This is a personal project. The source images are not committed to this repo
-and should not be redistributed.
+**These ports are an unofficial, non-commercial personal tribute.** They are
+not affiliated with or endorsed by Pierre Voisin or Daily Minimal. The original
+designs and all rights in them belong to Pierre Voisin. If you are the rights
+holder and would like any of these ports changed or removed, please open an
+issue or contact the repo owner, and they will be taken down promptly.
+
+The source images are not committed to this repo and should not be
+redistributed.
 
 ## Source images
 
