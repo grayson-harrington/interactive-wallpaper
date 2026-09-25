@@ -5,29 +5,15 @@
 // Once everything has stopped growing it holds, then starts over
 // (click, or Enter as in the original, restarts it right away).
 import { dmSketch } from './harness.js';
+import { dotPaperCanvas } from '../../lib/paper.js';
 
 const numRects = 50;
 const minDist = 40;
 const HOLD_MS = 12_000;
 const GRAIN_ORIGIN = 450; // grain layers cover [-450, 450) in rect coordinates
 
-function grainLayer() {
-  const size = GRAIN_ORIGIN * 2;
-  const c = document.createElement('canvas');
-  c.width = c.height = size;
-  const ctx = c.getContext('2d');
-  const img = ctx.createImageData(size, size);
-  const d = img.data;
-  // paper(200, 100): area/5 random 1px dots of fill(200±10, 100±5)
-  for (let n = 0; n < (size * size) / 5; n++) {
-    const k = Math.floor(Math.random() * size * size) * 4;
-    const g = 190 + Math.random() * 20;
-    d[k] = d[k + 1] = d[k + 2] = g;
-    d[k + 3] = 95 + Math.random() * 10;
-  }
-  ctx.putImageData(img, 0, 0);
-  return c;
-}
+// paper(200, 100): gray 200±10 dots at alpha 100±5, as a transparent layer
+const grainLayer = () => dotPaperCanvas(GRAIN_ORIGIN * 2, GRAIN_ORIGIN * 2, { gray: [190, 210], alpha: [95, 105] });
 
 function initRects(p, S) {
   const width = S.ow;

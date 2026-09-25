@@ -1,9 +1,17 @@
-// "Paper" grain textures, a recurring motif in the Daily Minimal pieces.
+// "Paper" textures, a recurring motif in the Daily Minimal pieces. The
+// originals used two recipes, and each has a helper here:
 //
-// The originals built these with tens of thousands of fill()+rect() calls
-// (one 2x2 block of random white at low alpha across the whole surface, plus
-// scattered brighter specks). Same recipe here, written straight into
-// ImageData so it takes milliseconds instead of seconds.
+//   paperCanvas     grain: 2x2 blocks of random white at low alpha across the
+//                   whole surface, plus scattered brighter specks. Used for
+//                   paper-textured objects and faces (S02-181, S02-238,
+//                   S02-459, IF-004).
+//   dotPaperCanvas  dots: many random 1px dots in a narrow grey range, the
+//                   originals' paper(c, alpha) function. Used for dark paper
+//                   backgrounds and shimmering grain layers (S02-401, S02-368).
+//
+// Both render once into an offscreen canvas (straight into ImageData, so it
+// takes milliseconds instead of the originals' seconds). Draw the result with
+// drawImage, or clip it to a shape with fillPathWithTexture.
 
 const rand = (a, b) => a + Math.random() * (b - a);
 
@@ -63,6 +71,69 @@ export function paperCanvas(
     ctx.fillStyle = `rgba(${g},${g},${g},${rand(speckAlpha[0], speckAlpha[1]) / 255})`;
     ctx.fillRect(rand(0, w), rand(0, h), rand(speckSize[0], speckSize[1]), rand(speckSize[0], speckSize[1]));
   }
+  return canvas;
+}
+
+// Returns an offscreen <canvas> of w x h covered in random 1px dots.
+//   base     [r,g,b] or gray fill underneath; null leaves it transparent and
+//            each dot replaces the pixel (a grain layer to draw over things)
+//   gray     [min,max] gray level of the dots
+//   alpha    [min,max] alpha (0-255) of the dots
+//   density  dots per pixel of area (the originals used 1/5)
+//   soft     place dots at sub-pixel positions, spread over their 4 nearest
+//            pixels, like the originals' fillRect at random fractional x/y
+//            (opaque base only)
+export function dotPaperCanvas(w, h, { base = null, gray = [190, 210], alpha = [95, 105], density = 1 / 5, soft = false } = {}) {
+  w = Math.max(1, Math.round(w));
+  h = Math.max(1, Math.round(h));
+  const canvas = document.createElement('canvas');
+  canvas.width = w;
+  canvas.height = h;
+  const ctx = canvas.getContext('2d');
+  const img = ctx.createImageData(w, h);
+  const d = img.data;
+  if (base !== null) {
+    const [br, bg, bb] = Array.isArray(base) ? base : [base, base, base];
+    for (let k = 0; k < d.length; k += 4) {
+      d[k] = br;
+      d[k + 1] = bg;
+      d[k + 2] = bb;
+      d[k + 3] = 255;
+    }
+  }
+  const n = Math.round(w * h * density);
+  // blend like fillRect would, so repeated hits build up
+  const blend = (x, y, g, t) => {
+    if (x < 0 || y < 0 || x >= w || y >= h) return;
+    const k = (y * w + x) * 4;
+    d[k] += (g - d[k]) * t;
+    d[k + 1] += (g - d[k + 1]) * t;
+    d[k + 2] += (g - d[k + 2]) * t;
+  };
+  for (let i = 0; i < n; i++) {
+    const g = rand(gray[0], gray[1]);
+    const a = rand(alpha[0], alpha[1]);
+    if (base === null) {
+      const k = Math.floor(Math.random() * w * h) * 4;
+      d[k] = d[k + 1] = d[k + 2] = g;
+      d[k + 3] = a;
+    } else if (soft) {
+      const x = Math.random() * w - 0.5;
+      const y = Math.random() * h - 0.5;
+      const x0 = Math.floor(x);
+      const y0 = Math.floor(y);
+      const fx = x - x0;
+      const fy = y - y0;
+      const t = a / 255;
+      blend(x0, y0, g, t * (1 - fx) * (1 - fy));
+      blend(x0 + 1, y0, g, t * fx * (1 - fy));
+      blend(x0, y0 + 1, g, t * (1 - fx) * fy);
+      blend(x0 + 1, y0 + 1, g, t * fx * fy);
+    } else {
+      blend(Math.floor(Math.random() * w), Math.floor(Math.random() * h), g, a / 255);
+    }
+  }
+  ctx.putImageData(img, 0, 0);
   return canvas;
 }
 

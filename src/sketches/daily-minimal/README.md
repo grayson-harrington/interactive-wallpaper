@@ -105,6 +105,9 @@ Other things to know:
   `title`, and the `ported` date. The date is blank for ports made before this
   file existed. Its `id`, `folder` and `file` columns match `rename_manifest.csv`,
   so the two can be joined to see what's left.
+- Paper textures come from [src/lib/paper.js](../../lib/paper.js):
+  `paperCanvas` (block grain with specks) and `dotPaperCanvas` (1px dots), plus
+  `fillPathWithTexture` to clip either one to a shape.
 - The app shell labels every piece in the bottom-left corner with its ID and
   "Daily Minimal by Pierre Voisin" (`showCredit` in `src/main.js`, styled by
   `.dm-credit`). It uses the piece's id, so new ports get it automatically.

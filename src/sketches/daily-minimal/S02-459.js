@@ -3,6 +3,7 @@
 // Grab a bobble and it springs back when released. In ambient mode an
 // invisible hand occasionally plucks one.
 import { dmSketch } from './harness.js';
+import { paperCanvas, fillPathWithTexture } from '../../lib/paper.js';
 
 const sideLength = 200;
 const halfSide = sideLength / 2;
@@ -18,32 +19,18 @@ const rand = (a, b) => a + Math.random() * (b - a);
 
 function bobbleImage(d) {
   const size = Math.ceil(d + 10);
+  const tex = paperCanvas(size, size, {
+    base: ballC,
+    grainAlpha: [primaryAlpha, primaryAlpha],
+    specks: numPaperParticles,
+    speckAlpha: [secondaryAlpha, secondaryAlpha],
+  });
   const c = document.createElement('canvas');
   c.width = c.height = size;
   const ctx = c.getContext('2d');
-  const cx = size / 2;
-  ctx.fillStyle = `rgb(${ballC.join(',')})`;
   ctx.beginPath();
-  ctx.arc(cx, cx, d / 2, 0, Math.PI * 2);
-  ctx.fill();
-  for (let i = Math.floor(cx - d / 2); i < cx + d / 2; i += 2) {
-    for (let j = Math.floor(cx - d / 2); j < cx + d / 2; j += 2) {
-      if (Math.hypot(i - cx, j - cx) < d / 2) {
-        const g = Math.round(rand(200, 255));
-        ctx.fillStyle = `rgba(${g},${g},${g},${primaryAlpha / 255})`;
-        ctx.fillRect(i, j, 2, 2);
-      }
-    }
-  }
-  for (let i = 0; i < numPaperParticles; i++) {
-    const x = rand(cx - d / 2, cx + d / 2);
-    const y = rand(cx - d / 2, cx + d / 2);
-    if (Math.hypot(x - cx, y - cx) < d / 2) {
-      const g = Math.round(rand(200, 255));
-      ctx.fillStyle = `rgba(${g},${g},${g},${secondaryAlpha / 255})`;
-      ctx.fillRect(x, y, rand(1, 3), rand(1, 3));
-    }
-  }
+  ctx.arc(size / 2, size / 2, d / 2, 0, Math.PI * 2);
+  fillPathWithTexture(ctx, tex);
   return c;
 }
 

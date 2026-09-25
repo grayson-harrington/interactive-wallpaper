@@ -100,6 +100,20 @@ Record the confirmed description and choices in the plan before building.
   state machine for ambient phases.
 - Header comment: `// <ID> <title in lowercase>`, then a line or two on the motion.
 - Time with `p.deltaTime` (capped) or frame counts. Never use raw `setTimeout`.
+- **Paper texture.** Many originals have a paper grain on shapes or backgrounds. Zoom
+  into the source to see which kind it is, then use the shared helpers in
+  [src/lib/paper.js](../../../src/lib/paper.js). Don't write your own:
+  - `paperCanvas(w, h, { base, grainAlpha, specks, ... })`: 2×2 white grain blocks
+    plus brighter specks, for paper-textured shapes and faces (see `IF-004.js`,
+    `S02-459.js`).
+  - `dotPaperCanvas(w, h, { base, gray, alpha, soft })`: random 1px dots, for
+    dark paper backgrounds (`S02-401.js`), or with `base: null` for a transparent
+    grain layer drawn over shapes (`S02-368.js`).
+  - `fillPathWithTexture(ctx, tex)` fills the current 2D path with a texture in
+    the same coordinates, so any shape can be clipped to paper.
+
+  Render textures once in `init`, never per frame. For shimmer, cycle a few
+  pre-rendered layers, as `S02-368.js` does.
 - Register it in `index.js` in ID order:
   `{ id: '<ID>', label: '<ID> <Short Title>', sketch: <ID with _ for -> }`.
   The shell adds the corner credit automatically. Don't draw one in the sketch.

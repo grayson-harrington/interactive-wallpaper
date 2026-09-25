@@ -2,6 +2,7 @@
 // Light bars accelerate across a dark paper disc. The original pointed the
 // flow away from the mouse; in ambient mode the direction turns slowly.
 import { dmSketch } from './harness.js';
+import { dotPaperCanvas } from '../../lib/paper.js';
 
 const gap = 10;
 const circleWidth = 300;
@@ -10,29 +11,19 @@ const stop = circleWidth / 2 + 50;
 const rectColor = 239;
 const backgroundColor = 43;
 
-function paperBackground(w, h) {
-  const c = document.createElement('canvas');
-  c.width = w;
-  c.height = h;
-  const ctx = c.getContext('2d');
-  ctx.fillStyle = `rgb(${backgroundColor},${backgroundColor},${backgroundColor})`;
-  ctx.fillRect(0, 0, w, h);
-  // paper(background, 100, 50, ...): area/5 random 1px dots
-  for (let n = 0; n < (w * h) / 5; n++) {
-    const g = Math.round(100 + (Math.random() * 20 - 10));
-    ctx.fillStyle = `rgba(${g},${g},${g},${(50 + (Math.random() * 10 - 5)) / 255})`;
-    ctx.fillRect(Math.random() * w - 0.5, Math.random() * h - 0.5, 1, 1);
-  }
-  return c;
-}
-
 export default dmSketch({
   ow: 500,
   oh: 500,
   bg: rectColor,
   fps: 30,
   init(p, S) {
-    S.background = paperBackground(S.ow, S.oh);
+    // paper(background, 100, 50): gray 100±10 dots at alpha 50±5
+    S.background = dotPaperCanvas(S.ow, S.oh, {
+      base: backgroundColor,
+      gray: [90, 110],
+      alpha: [45, 55],
+      soft: true,
+    });
     S.positions = [start];
     S.angle = Math.PI / 4;
     S.frame = 0;
