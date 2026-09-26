@@ -20,6 +20,7 @@ const rand = (a, b) => a + Math.random() * (b - a);
 //   grainAlpha  [min,max] alpha (0-255) of the 2x2 white-ish grain blocks
 //   specks      number of brighter specks
 //   speckAlpha  [min,max]
+//   speckGray   [min,max] gray level of the specks (low for dark flecks)
 //   speckSize   [min,max] side length in px
 //   transparent start from transparent instead of `base` (grain only)
 export function paperCanvas(
@@ -31,6 +32,7 @@ export function paperCanvas(
     specks = Math.round((w * h) / 500),
     speckAlpha = [50, 75],
     speckSize = [1, 3],
+    speckGray = [200, 255],
     transparent = false,
   } = {},
 ) {
@@ -67,7 +69,7 @@ export function paperCanvas(
   ctx.putImageData(img, 0, 0);
 
   for (let s = 0; s < specks; s++) {
-    const g = Math.round(rand(200, 255));
+    const g = Math.round(rand(speckGray[0], speckGray[1]));
     ctx.fillStyle = `rgba(${g},${g},${g},${rand(speckAlpha[0], speckAlpha[1]) / 255})`;
     ctx.fillRect(rand(0, w), rand(0, h), rand(speckSize[0], speckSize[1]), rand(speckSize[0], speckSize[1]));
   }
