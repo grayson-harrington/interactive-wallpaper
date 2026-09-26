@@ -58,10 +58,13 @@ Then write a description for the owner:
 - **Illusions**: implied 3D, impossible geometry, negative space, moiré.
 - **Uncertainties**: say plainly what you can't tell.
 
-Ask for confirmation with AskUserQuestion ("Yes, accurate" / "Mostly, with corrections"
-/ "No, re-read it"). Apply corrections and confirm again. If the corrections were
-small and precise, you can put the reconfirm question in the same AskUserQuestion
-call as step 3. If a later measurement contradicts something the owner confirmed,
+**Show the reading to the owner as visible reply text, then end your turn.** Put the
+full description in your final message and close it by asking whether it's accurate.
+Don't ask in the same turn. The owner can't see your thinking, and text written just
+before a tool call can be collapsed out of view, so an AskUserQuestion sent right after
+the description reaches them with nothing to confirm. Wait for their reply. If they
+have corrections, apply them and show the revised reading the same way. Once the
+reading is confirmed, go on to step 3. If a later measurement contradicts something the owner confirmed,
 build from the measurement and tell the owner what changed.
 
 The owner has said artwork should be centered in the port's canvas, even though the
