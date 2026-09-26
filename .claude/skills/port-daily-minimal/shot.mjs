@@ -2,12 +2,11 @@
 // can be laid over the source image.
 //   node .claude/skills/port-daily-minimal/shot.mjs <id> <out.png> [waitMs] [mode] [ow] [oh]
 // e.g. node .claude/skills/port-daily-minimal/shot.mjs S02-582 /tmp/rest.png 1500
-// The server must be serving a fresh build (npm run build). The harness scales
-// the original canvas by FIT of the viewport, so the viewport is sized to make
-// that scale exactly 1 and the clip is the original canvas.
+// The server must be serving a fresh build (npm run build). ?native=1 makes the
+// harness draw at scale 1 with the canvas centered, so a viewport of exactly
+// ow x oh shows the original canvas (piece `scale` and `art` are ignored).
 import { chromium } from 'playwright';
 
-const FIT = 0.74; // keep in sync with src/sketches/daily-minimal/harness.js
 const [, , id, out, wait = '1500', mode = 'ambient', ow = '1000', oh = ow] = process.argv;
 if (!id || !out) {
   console.error('usage: shot.mjs <id> <out.png> [waitMs] [mode] [ow] [oh]');
@@ -15,15 +14,14 @@ if (!id || !out) {
 }
 const W = Number(ow);
 const H = Number(oh);
-const side = Math.ceil(Math.max(W, H) / FIT);
 
 const browser = await chromium.launch({ args: ['--use-angle=swiftshader', '--enable-unsafe-swiftshader'] });
-const page = await browser.newPage({ viewport: { width: side, height: side }, deviceScaleFactor: 1 });
-await page.goto(`${process.env.BASE || 'http://localhost:4747'}/?follow=0&ui=0&mode=${mode}`);
+const page = await browser.newPage({ viewport: { width: W, height: H }, deviceScaleFactor: 1 });
+await page.goto(`${process.env.BASE || 'http://localhost:4747'}/?follow=0&ui=0&native=1&mode=${mode}`);
 await page.waitForFunction(() => window.__wallpaper);
 await page.addStyleTag({ content: '.dm-credit { display: none !important; }' });
 await page.evaluate((s) => window.__wallpaper.show({ id: 'daily-minimal', sub: s }), id);
 await page.waitForTimeout(Number(wait));
-await page.screenshot({ path: out, clip: { x: (side - W) / 2, y: (side - H) / 2, width: W, height: H } });
+await page.screenshot({ path: out });
 await browser.close();
 console.log(out);

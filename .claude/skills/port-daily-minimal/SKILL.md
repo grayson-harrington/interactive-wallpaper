@@ -67,8 +67,9 @@ have corrections, apply them and show the revised reading the same way. Once the
 reading is confirmed, go on to step 3. If a later measurement contradicts something the owner confirmed,
 build from the measurement and tell the owner what changed.
 
-The owner has said artwork should be centered in the port's canvas, even though the
-original sits slightly above center to make room for its caption.
+The owner has said artwork should be centered on screen, even though the original
+sits slightly above center to make room for its caption. The harness does this: it
+centers the piece's `art` box (see Size, in step 4).
 
 ## 3. Choose animation and interaction
 
@@ -101,6 +102,21 @@ Record the confirmed description and choices in the plan before building.
   [S02-582.js](../../../src/sketches/daily-minimal/S02-582.js): measured constants at
   the top, one draw function that takes the animated parameters, and a small
   state machine for ambient phases.
+- **Size.** All ports read at the same size on screen. Don't bake margins or a scale
+  into the drawing code. Instead set two fields next to `ow`/`oh`:
+  - `art: [x, y, w, h]`: the bounds of the main form in the rest pose, in original
+    coordinates. Take them from the step 2 `bbox` (the caption is excluded) or,
+    better, from the measured constants (`art: [X0, Y0, W, W]` in `S02-582.js`).
+    Leave out secondary extras, such as lines running off to the canvas edge. For
+    a rotating form, use a centered square of its equal-area side (`IF-004.js`).
+  - `scale: 1`: the per-piece tuning knob. Leave it at 1 unless the owner asks for
+    this piece to read bigger or smaller.
+
+  The harness scales `art` so that `sqrt(w·h)` is `SIZE` (50%) of the shorter
+  screen side times `scale`, and centers it. Very wide or tall boxes are capped at
+  90% of the screen. Drawing is still clipped to the original canvas. A
+  standalone WEBGL piece that doesn't use the harness imports `SIZE` and follows
+  the same rule (`S02-238.js`).
 - Header comment: `// <ID> <title in lowercase>`, then a line or two on the motion.
 - Time with `p.deltaTime` (capped) or frame counts. Never use raw `setTimeout`.
 - **Paper texture.** Many originals have a paper grain on shapes or backgrounds. Zoom
@@ -127,10 +143,12 @@ Record the confirmed description and choices in the plan before building.
 
 ```sh
 npm run build
-node $SK/shot.mjs <ID> /tmp/rest.png 1500            # 1:1 render of the rest pose
+node $SK/shot.mjs <ID> /tmp/rest.png 1500 ambient <ow> <oh>  # 1:1 render of the rest pose
 python3 $SK/overlay.py "<image>" /tmp/rest.png /tmp/overlay.png --shift 0 <dy>
 ```
 
+`shot.mjs` loads the page with `?native=1`, so the harness draws the original canvas
+at scale 1 and ignores `art` and `scale`. `ow`/`oh` default to 1000.
 Use your scratchpad instead of `/tmp`. `<dy>` is how far the port moved the artwork
 (e.g. 14 when centering a frame the original had at y≈485). Red is the source and
 cyan is the port. Read the overlay and tune the constants until they line up, then
@@ -143,7 +161,14 @@ the motion states.
 ONLY=<ID> npm run thumbs      # just this piece's grid thumbnail
 npm run build
 ONLY=<ID> npm run check       # and MODE=interactive ONLY=<ID> npm run check
+node $SK/size.mjs <ID>        # on-screen size: should read about 0.50
 ```
+
+`size.mjs` measures everything drawn, so extras outside `art` read a little higher,
+which is fine. Anything far from 0.50 means the `art` box is wrong. Also look at a few
+animation moments at full-screen size (e.g. 1600×1000). Check that nothing clips at
+the canvas edge and that nothing crowds the menu (top-right) or the credit
+(bottom-left).
 
 The server (launchd agent on :4747) must be running. Then tell the owner to reload
 Plash. Report what you built, any measurements that differed from the confirmed
