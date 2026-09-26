@@ -31,6 +31,8 @@ function cube(S, ctx, x, y, off, l, m, d) {
 export default dmSketch({
   ow: 600,
   oh: 600,
+  art: [156, 156, 288, 288], // the rotating triangle, as a centered square of its equal-area side
+  scale: 1,
   bg: backC,
   init(p, S) {
     const opts = { specks: (600 * 600) / 250, speckSize: [0.5, 2] };

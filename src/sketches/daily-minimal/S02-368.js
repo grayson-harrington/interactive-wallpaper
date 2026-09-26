@@ -81,6 +81,8 @@ function restart(p, S) {
 export default dmSketch({
   ow: 500,
   oh: 500,
+  art: [75, 75, 350, 350], // the circle
+  scale: 1,
   bg: 25,
   init(p, S) {
     S.grain = [grainLayer(), grainLayer(), grainLayer()];

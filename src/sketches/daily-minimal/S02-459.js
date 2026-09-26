@@ -75,6 +75,8 @@ const EDGES = [
 export default dmSketch({
   ow: 500,
   oh: 500,
+  art: [74, 60, 366, 366], // the unit cell
+  scale: 1,
   bg: backC,
   init(p, S) {
     const img = bobbleImage(ballS);

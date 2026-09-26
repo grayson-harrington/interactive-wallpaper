@@ -13,6 +13,8 @@ function circle(x, y, d, bandThickness, numBands) {
 export default dmSketch({
   ow: 700,
   oh: 700,
+  art: [100, 100, 500, 500], // the outer circle
+  scale: 1,
   bg: light,
   init(p, S) {
     const height = S.oh;

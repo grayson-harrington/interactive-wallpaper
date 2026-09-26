@@ -50,6 +50,8 @@ function interact(p, S, a, b) {
 export default dmSketch({
   ow: 800,
   oh: 300,
+  art: [100, 0, 600, 300], // the track the diamonds slide along, at their largest
+  scale: 1,
   bg: backC,
   init(p, S) {
     p.randomSeed(32333);

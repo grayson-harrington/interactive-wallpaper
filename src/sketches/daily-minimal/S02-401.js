@@ -16,6 +16,8 @@ const backgroundColor = 43;
 export default dmSketch({
   ow: 500,
   oh: 500,
+  art: [100, 100, 300, 300], // the circle
+  scale: 1,
   bg: rectColor,
   fps: 30,
   init(p, S) {

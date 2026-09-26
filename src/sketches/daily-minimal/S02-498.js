@@ -248,6 +248,8 @@ const smooth = (t) => t * t * (3 - 2 * t);
 export default dmSketch({
   ow: 1280,
   oh: 1280,
+  art: [F0, F0, F1 - F0, F1 - F0], // the frame
+  scale: 1,
   bg,
   fps: 30,
   init(p, S) {

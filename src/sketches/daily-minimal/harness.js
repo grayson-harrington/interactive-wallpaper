@@ -1,13 +1,17 @@
 // Shared frame for the Daily Minimal ports.
 //
-// Each piece was composed for a small fixed canvas (400-800px). The harness
-// keeps that composition intact: the original canvas is scaled to fit the
-// screen (FIT of the limiting dimension), centered, clipped to its own bounds,
-// and the rest of the screen is filled with the piece's background color, so
-// the port draws in the original coordinate system unchanged.
+// Each piece draws in its original canvas coordinates (ow x oh), unchanged.
+// The harness sizes every piece the same way on screen: the rest-pose bounds
+// of its main form (`art`) are scaled so their equal-area side, sqrt(w*h), is
+// SIZE of the shorter screen side (times the piece's own `scale`), and that
+// box is centered. Drawing is clipped to the original canvas, and the rest of
+// the screen is filled with the piece's background color.
+// ?native=1 draws at scale 1 with the canvas centered, for 1:1 fidelity shots.
 //
 // spec: {
 //   ow, oh        original canvas size
+//   art           [x, y, w, h] rest-pose bounds of the main form (default: canvas)
+//   scale         per-piece size tuning, multiplies SIZE (default 1)
 //   bg            background (p5 color args, e.g. 239 or [22])
 //   fps           original frameRate (default 60)
 //   init(p, S)    once, like setup()
@@ -16,20 +20,32 @@
 //   onActivate(p, S) optional, each time the piece is shown again
 //   ...handlers   mousePressed/mouseReleased/keyPressed/keyReleased(p, S)
 // }
-// S: { ow, oh, k, mouseX, mouseY, live } - mouse is mapped into original
+// S: { ow, oh, scale, k, mouseX, mouseY, live } - mouse is mapped into original
 //   coordinates; `live` is true while someone is actually using the page.
 
-export const FIT = 0.74;
+export const SIZE = 0.5;
+
+const native = new URLSearchParams(location.search).get('native') === '1';
 
 export function dmSketch(spec) {
   return (p) => {
-    const S = { ow: spec.ow, oh: spec.oh, k: 1, ox: 0, oy: 0, mouseX: 0, mouseY: 0, live: false };
+    const S = { ow: spec.ow, oh: spec.oh, scale: spec.scale ?? 1, k: 1, ox: 0, oy: 0, mouseX: 0, mouseY: 0, live: false };
     const bg = [].concat(spec.bg);
 
+    const [ax, ay, aw, ah] = spec.art ?? [0, 0, spec.ow, spec.oh];
+
     function layout() {
-      S.k = Math.min(p.width / S.ow, p.height / S.oh) * FIT;
-      S.ox = (p.width - S.ow * S.k) / 2;
-      S.oy = (p.height - S.oh * S.k) / 2;
+      if (native) {
+        S.k = 1;
+        S.ox = (p.width - S.ow) / 2;
+        S.oy = (p.height - S.oh) / 2;
+        return;
+      }
+      const { width: W, height: H } = p;
+      // equal-area sizing, capped so very wide or tall art still fits
+      S.k = Math.min((SIZE * S.scale * Math.min(W, H)) / Math.sqrt(aw * ah), (0.9 * W) / aw, (0.9 * H) / ah);
+      S.ox = W / 2 - (ax + aw / 2) * S.k;
+      S.oy = H / 2 - (ay + ah / 2) * S.k;
     }
 
     p.setup = () => {
@@ -47,12 +63,17 @@ export function dmSketch(spec) {
       p.background(...bg);
       const ctx = p.drawingContext;
       p.push();
+      ctx.save();
+      // clip to the original canvas, snapped to device pixels: a soft clip edge
+      // leaves seams where a piece masks its own drawing with the background
+      const d = p.pixelDensity();
+      const snap = (v) => Math.round(v * d) / d;
+      const [x0, y0] = [snap(S.ox), snap(S.oy)];
+      ctx.beginPath();
+      ctx.rect(x0, y0, snap(S.ox + S.ow * S.k) - x0, snap(S.oy + S.oh * S.k) - y0);
+      ctx.clip();
       p.translate(S.ox, S.oy);
       p.scale(S.k);
-      ctx.save();
-      ctx.beginPath();
-      ctx.rect(0, 0, S.ow, S.oh);
-      ctx.clip();
       spec.frame(p, S);
       ctx.restore();
       p.pop();

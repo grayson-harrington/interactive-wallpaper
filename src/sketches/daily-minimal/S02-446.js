@@ -18,6 +18,8 @@ function noiseCircle(zoff) {
 export default dmSketch({
   ow: 500,
   oh: 500,
+  art: [100, 100, 300, 300], // the circle
+  scale: 1,
   bg: backC,
   init(p, S) {
     S.circles = Array.from({ length: 5 }, (_, i) => noiseCircle(i * 5));

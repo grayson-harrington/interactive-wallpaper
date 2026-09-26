@@ -578,6 +578,8 @@ function hold(p, S, sec, then) {
 export default dmSketch({
   ow: 1000,
   oh: 1000,
+  art: [274, 280, 452, 440], // the broken square at rest, gaps included
+  scale: 1,
   bg,
   fps: 30,
   init(p, S) {

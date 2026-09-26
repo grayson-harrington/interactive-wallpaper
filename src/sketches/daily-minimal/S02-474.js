@@ -10,6 +10,8 @@ const numLines = 50;
 export default dmSketch({
   ow: 500,
   oh: 500,
+  art: [125, 125, 250, 250], // the circular window the lines show through
+  scale: 1,
   bg: backC,
   fps: 2,
   init(p, S) {

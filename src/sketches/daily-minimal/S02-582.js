@@ -61,6 +61,8 @@ function drawTunnel(p, vx, vy) {
 export default dmSketch({
   ow: 1000,
   oh: 1000,
+  art: [X0, Y0, W, W], // the frame
+  scale: 1,
   bg,
   init(p, S) {
     S.wander = wanderer(p, 500, 500, W * 0.6, 0.003);

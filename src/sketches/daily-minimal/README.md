@@ -95,8 +95,11 @@ Other things to know:
 
 - Each port is one file in this folder, built with `dmSketch()` from
   [harness.js](harness.js). The harness lets a piece draw in the original canvas
-  coordinates. It fits that canvas to the screen and fills the margin with the
-  background color.
+  coordinates. Every piece declares `art: [x, y, w, h]`, the rest-pose bounds of
+  its main form. The harness scales that box so its equal-area side, `sqrt(w·h)`,
+  is 50% of the shorter screen side (`SIZE`), and centers it, so all ports read
+  at about the same size. The margin is filled with the background color. The
+  per-piece `scale` (default 1) fine-tunes one piece's size.
 - Register the port in [index.js](index.js). That one entry adds it to the
   Daily Minimal thumbnail selection screen and to the wallpaper webapp's
   dropdown, which gets it through `src/shell/registry.js`.

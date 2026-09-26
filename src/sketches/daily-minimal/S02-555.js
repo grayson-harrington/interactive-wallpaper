@@ -84,6 +84,8 @@ function drawGrid(p, S, sx, sy) {
 export default dmSketch({
   ow: 1000,
   oh: 1000,
+  art: [X0, X0, SPAN, SPAN], // the tile grid
+  scale: 1,
   bg,
   fps: 30,
   init(p, S) {

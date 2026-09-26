@@ -7,6 +7,8 @@ const back = 237;
 export default dmSketch({
   ow: 400,
   oh: 400,
+  art: [66, 106, 268, 188], // the waves across the masked window, centered on the circle
+  scale: 1,
   bg: back,
   init(p, S) {
     // y(t) = A*sin(TWO_PI*f*t+p): [amplitude, frequency, phase]

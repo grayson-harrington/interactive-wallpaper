@@ -49,6 +49,8 @@ function bestPairs(points) {
 export default dmSketch({
   ow: 600,
   oh: 600,
+  art: [100, 100, 400, 400], // the circle
+  scale: 1,
   bg: backC,
   init(p, S) {
     p.randomSeed(500);

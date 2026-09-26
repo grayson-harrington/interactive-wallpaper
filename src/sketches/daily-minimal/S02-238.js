@@ -8,11 +8,15 @@
 // objects (one per paper texture) instead of re-emitting ~2400 textured quads
 // every frame.
 
-import { FIT } from './harness.js';
+import { SIZE } from './harness.js';
 import { paperCanvas } from '../../lib/paper.js';
 
 const backC = 239;
 const ORIGINAL = 600;
+// Sizing like the harness: the start pose is the cube (side 250) face-on, which
+// p5's default perspective camera shows about 1.47x larger, so ~367 across.
+const ART = 367;
+const SCALE = 1; // per-piece size tuning
 const maxDepth = 3;
 const STEP_FRAMES = 45 * 7; // ~7s per depth in ambient mode
 const HOLD_FRAMES = 45 * 16;
@@ -117,7 +121,7 @@ export default function fractalCube(p) {
 
     angle += 0.005;
     p.background(backC);
-    const k = (Math.min(p.width, p.height) / ORIGINAL) * FIT;
+    const k = (SIZE * SCALE * Math.min(p.width, p.height)) / ART;
     p.scale(k);
     p.rotateX(angle);
     p.rotateY(angle);

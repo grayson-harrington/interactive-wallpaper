@@ -24,6 +24,8 @@ function makePath(p, x, y, r) {
 export default dmSketch({
   ow: 500,
   oh: 500,
+  art: [78, 85, 344, 299], // the triangle
+  scale: 1,
   bg: backC,
   init(p, S) {
     S.paths = [];
