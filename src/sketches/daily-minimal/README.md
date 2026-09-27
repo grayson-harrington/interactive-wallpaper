@@ -28,46 +28,8 @@ redistributed.
 
 ## Source images
 
-The static originals were scraped from the Daily Minimal Pinterest boards and live
-outside this repo:
-
-```
-/Users/graysonharrington/Documents/Programming/Daily Minimal/dm_scraping/downloads
-```
-
-The scraper project one level up (`dm_scraping/`) also has:
-
-- `rename_manifest.csv` has one row per image: board, original pin file,
-  new name, how the ID was found (`ok`, `ok-ocr`, `ok-metadata`), the OCR text,
-  and the original Pinterest caption. Check it for a piece's official title or
-  series name.
-- `overrides.csv` lists IDs that were corrected by eye where the OCR and caption disagreed.
-- `metadata/<board>.json` holds the raw Pinterest metadata per board.
-
-### Organization
-
-There is one folder per Pinterest board, 1,753 files in total
-(1,674 jpg, 76 png, 1 gif, 1 m4v):
-
-| Folder           | Files | Contents                                    |
-| ---------------- | ----: | ------------------------------------------- |
-| `série-n01/`     |   952 | Série 1, the main daily run (S01-001 to S01-999) |
-| `circles/`       |   266 | Themed board: circle-based designs          |
-| `polygons/`      |   152 | Themed board: polygon-based designs         |
-| `triangles/`     |   116 | Themed board: triangle-based designs        |
-| `latest-designs/`|    94 | The most recent posts, mixed series         |
-| `lines/`         |    87 | Themed board: line-based designs            |
-| `squares/`       |    73 | Themed board: square-based designs          |
-| `c-collection/`  |     6 | [C] collection                              |
-| `s-collection/`  |     5 | [S] collection                              |
-| `t-collection/`  |     1 | [T] collection                              |
-
-The themed boards (`circles`, `lines`, `polygons`, `squares`, `triangles`) are
-mostly Série 2 plus special editions. A design can appear on more than one
-board (59 IDs show up in more than one folder). Look up an ID across all folders
-before assuming it's missing.
-
-Files are named by the design's ID, taken from the caption or read off the image by OCR:
+The static originals live in a local archive outside this repo and are never
+committed. Each design is identified by its Daily Minimal ID:
 
 | Prefix        | Series                                                  |
 | ------------- | ------------------------------------------------------- |
@@ -83,14 +45,6 @@ Files are named by the design's ID, taken from the caption or read off the image
 | `SE-OI-NNN`   | Special Edition: Optical Illusions                      |
 | `C-`, `S-`, `T-`, `A-` | The lettered collections                       |
 
-Other things to know:
-
-- A `_2` suffix (e.g. `S01-480_2.jpg`) is a second image posted under the same ID.
-- Files with long numeric names (e.g. `484488872392948100.jpg`) are pins whose ID
-  couldn't be identified. The name is the Pinterest pin ID.
-- `série-n01/484488872395094270.gif` and `latest-designs/484488872420468517.m4v`
-  are original animations. Check their motion before designing your own.
-
 ## Where ports live in this app
 
 - Each port is one file in this folder, built with `dmSketch()` from
@@ -103,17 +57,17 @@ Other things to know:
 - Register the port in [index.js](index.js). That one entry adds it to the
   Daily Minimal thumbnail selection screen and to the wallpaper webapp's
   dropdown, which gets it through `src/shell/registry.js`.
-- Naming: everything uses the design's ID from the scrape, exactly as spelled
+- Naming: everything uses the design's ID from the archive, exactly as spelled
   there. The sketch is `<ID>.js`, its id is `'<ID>'`, and its thumbnail is
   `public/thumbs/<ID>.png` (e.g. `S02-404.js`, `IF-004.js`). The import name
   swaps hyphens for underscores (`S02_404`). The label is `'<ID> <Short Title>'`.
   Check the number and the series: a Série 2 design and a Série 1 design can
   share a number.
-- [ported.csv](ported.csv) tracks which scraped designs have been ported. It has
-  one row per port: `id`, the scrape `folder` and `file`, the `sketch` file, the
+- [ported.csv](ported.csv) tracks which archived designs have been ported. It has
+  one row per port: `id`, the archive `folder` and `file`, the `sketch` file, the
   `title`, and the `ported` date. The date is blank for ports made before this
-  file existed. Its `id`, `folder` and `file` columns match `rename_manifest.csv`,
-  so the two can be joined to see what's left.
+  file existed. Its `id`, `folder` and `file` columns match the archive's
+  `rename_manifest.csv`, so the two can be joined to see what's left.
 - Paper textures come from [src/lib/paper.js](../../lib/paper.js):
   `paperCanvas` (block grain with specks) and `dotPaperCanvas` (1px dots), plus
   `fillPathWithTexture` to clip either one to a shape.

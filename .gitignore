@@ -8,5 +8,5 @@ check-out
 images/*/*
 !images/*/.gitkeep
 
-# private Daily Minimal outreach (drafts to Pierre Voisin, screen recordings)
+# private notes
 src/sketches/daily-minimal/outreach/

@@ -1,21 +1,24 @@
 ---
 name: port-daily-minimal
-description: Port a static Daily Minimal design from the scraped image archive into an animated, interactive p5.js piece in this repo. Use when the user names a design ID (S01-123, S02-582, IF-004, SE-BS-012, DW-BH-003, ...), says "let's do/port/recreate a daily minimal", or asks to bring another Daily Minimal image over.
+description: Port a static Daily Minimal design from the local image archive into an animated, interactive p5.js piece in this repo. Use when the user names a design ID (S01-123, S02-582, IF-004, SE-BS-012, DW-BH-003, ...), says "let's do/port/recreate a daily minimal", or asks to bring another Daily Minimal image over.
 ---
 
 # Port a Daily Minimal design
 
-Turn one static image from the scraped Daily Minimal archive into an animated,
+Turn one static image from the local Daily Minimal archive into an animated,
 interactive p5.js piece. The project owner decides how it moves and responds.
 Your job is to read the image precisely, confirm that reading, offer good
 options, and build a faithful port.
 
-Background (archive layout, ID prefixes, attribution, naming) is in
-[src/sketches/daily-minimal/README.md](../../../src/sketches/daily-minimal/README.md).
-Read it first if you haven't this session.
+Background (ID prefixes, attribution, naming) is in
+[src/sketches/daily-minimal/README.md](../../../src/sketches/daily-minimal/README.md),
+and the archive's layout (boards, manifest columns, odd file names) is in
+`dm_scraping/ARCHIVE.md`, which stays out of the repo. Read both first if you
+haven't this session.
 
-- Archive: `/Users/graysonharrington/Documents/Programming/Daily Minimal/dm_scraping/downloads/<board>/<ID>.<ext>`
-- Titles and captions: `dm_scraping/rename_manifest.csv`
+- Archive: `"$HOME/Documents/Programming/Daily Minimal/dm_scraping"`
+- Images: `downloads/<board>/<ID>.<ext>` inside it
+- Titles and captions: `rename_manifest.csv` inside it
 - Already ported: `src/sketches/daily-minimal/ported.csv`
 
 Don't write sketch code until steps 1–3 are done and the owner has confirmed each.
