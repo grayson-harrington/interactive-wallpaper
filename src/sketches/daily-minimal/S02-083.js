@@ -37,6 +37,7 @@ const MIN_DIST = 3;
 // Timing, in seconds.
 const HOLD = 15;
 const LAP = 30;
+const HOME = 6; // eased return to rest after someone leaves
 const EASE = 3; // per second, toward the cursor-driven offset
 
 const smoother = (t) => t * t * t * (t * (t * 6 - 15) + 10);
@@ -116,15 +117,18 @@ export default dmSketch({
       settling = Math.abs(angle - S.angle) > 0.001 || Math.abs(dist - S.dist) > 0.01;
       S.state = 'live';
     } else if (S.state === 'live') {
+      // ease back to the rest pose the short way round
       S.state = 'home';
+      S.t = 0;
+      S.from = [S.angle, S.dist, wrapAngle(REST_ANGLE - S.angle)];
     }
 
     if (S.state === 'home') {
-      // ease back to the rest pose the short way round
-      const k = Math.min(1, EASE * dt);
-      S.angle += wrapAngle(REST_ANGLE - S.angle) * k;
-      S.dist += (REST_DIST - S.dist) * k;
-      if (Math.abs(wrapAngle(REST_ANGLE - S.angle)) < 0.001 && Math.abs(REST_DIST - S.dist) < 0.01) {
+      S.t = Math.min(1, S.t + dt / HOME);
+      const e = smoother(S.t);
+      S.angle = S.from[0] + S.from[2] * e;
+      S.dist = S.from[1] + (REST_DIST - S.from[1]) * e;
+      if (S.t >= 1) {
         S.angle = REST_ANGLE;
         S.dist = REST_DIST;
         S.state = 'hold';

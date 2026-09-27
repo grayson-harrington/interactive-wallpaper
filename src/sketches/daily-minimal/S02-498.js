@@ -8,7 +8,7 @@
 // makes each step land exactly where the next ring was. The throat leans
 // toward the mouse (heavily) while someone is using the page and toward a slow
 // wanderer otherwise, dragging the nearby surface with it.
-import { dmSketch, wanderer } from "./harness.js";
+import { dmSketch, wanderer, restCycle } from "./harness.js";
 
 const bg = 22;
 const ink = 243;
@@ -239,11 +239,11 @@ const clampOffset = (x, y) => {
 };
 
 // Ambient: rest on the original, drift away with the wanderer, come back.
-const HOLD = 30;
+// The rings keep draining through the hold, which leaves the image unchanged.
+const HOLD = 20;
 const LEAVE = 6;
 const ROAM = 40;
 const RETURN = 6;
-const smooth = (t) => t * t * (3 - 2 * t);
 
 export default dmSketch({
   ow: 1280,
@@ -253,11 +253,10 @@ export default dmSketch({
   bg,
   fps: 30,
   init(p, S) {
-    S.wander = wanderer(p, REST[0], REST[1], REACH_X * 1.4, 0.0015);
+    S.wander = wanderer(p, REST[0], REST[1], REACH_X * 1.4, 0.045);
     S.phase = 0;
     S.off = [0, 0];
-    S.state = "hold";
-    S.t = 0;
+    S.cycle = restCycle({ hold: HOLD, leave: LEAVE, away: ROAM, back: RETURN });
     S.from = [0, 0];
     S.wasLive = false;
   },
@@ -272,25 +271,16 @@ export default dmSketch({
       S.off[0] += (tx - S.off[0]) * ease;
       S.off[1] += (ty - S.off[1]) * ease;
     } else {
-      if (S.wasLive) [S.state, S.t, S.from] = ["return", 0, [...S.off]];
-      S.t += dt;
+      const c = S.cycle;
+      if (S.wasLive) c.toRest(RETURN);
+      else c.step(dt);
+      if (c.turned && c.phase === "back") S.from = [...S.off];
       const w = S.wander();
       const target = clampOffset(w[0] - REST[0], w[1] - REST[1]);
-      if (S.state === "hold") {
-        S.off = [0, 0];
-        if (S.t >= HOLD) [S.state, S.t] = ["leave", 0];
-      } else if (S.state === "leave") {
-        const k = smooth(Math.min(S.t / LEAVE, 1));
-        S.off = [target[0] * k, target[1] * k];
-        if (S.t >= LEAVE) [S.state, S.t] = ["roam", 0];
-      } else if (S.state === "roam") {
-        S.off = target;
-        if (S.t >= ROAM) [S.state, S.t, S.from] = ["return", 0, [...S.off]];
-      } else {
-        const k = smooth(Math.min(S.t / RETURN, 1));
-        S.off = [S.from[0] * (1 - k), S.from[1] * (1 - k)];
-        if (S.t >= RETURN) [S.state, S.t] = ["hold", 0];
-      }
+      if (c.phase === "hold") S.off = [0, 0];
+      else if (c.phase === "leave") S.off = [target[0] * c.k, target[1] * c.k];
+      else if (c.phase === "away") S.off = target;
+      else S.off = [S.from[0] * (1 - c.k), S.from[1] * (1 - c.k)];
     }
     S.wasLive = S.live;
 

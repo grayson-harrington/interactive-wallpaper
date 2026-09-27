@@ -1,8 +1,8 @@
 // S02-588 black hole
-// 240 fine white rays fanning out from a black disc, cut off by a square. Every
-// 30s the disc drifts once round the square's center and back to rest where it
-// started, the rays re-aiming from it as it goes (each orbit the other way
-// round from the last). With someone at the page, the disc eases after the
+// 240 fine white rays fanning out from a black disc, cut off by a square.
+// After a 15s rest the disc drifts, over 30s, once round the square's center
+// and back to rest where it started, the rays re-aiming from it as it goes
+// (each orbit the other way round from the last). With someone at the page, the disc eases after the
 // cursor, kept inside the square, and drifts home when they leave.
 import { dmSketch } from './harness.js';
 
@@ -29,8 +29,9 @@ const MAX_Y = SQ[1] + SQ[3] - DISC;
 
 // Ambient orbit: once round the square's center, through the disc's home,
 // over MOVE seconds, then rest HOLD seconds. It stays inside the square.
-const MOVE = 24;
-const HOLD = 6;
+const MOVE = 30;
+const HOLD = 15;
+const HOME = 6; // eased drift home after someone leaves
 const PX = SQ[0] + SQ[2] / 2;
 const PY = SQ[1] + SQ[3] / 2;
 const ORBIT = Math.hypot(OX - PX, OY - PY);
@@ -108,20 +109,18 @@ export default dmSketch({
       S.x = PX + ORBIT * Math.cos(a);
       S.y = PY + ORBIT * Math.sin(a);
     } else if (S.mode === 'live') {
-      if (!S.live) S.mode = 'home';
+      if (!S.live) [S.mode, S.u, S.from] = ['home', 0, [S.x, S.y]];
       const tx = clamp(S.mouseX, MIN_X, MAX_X);
       const ty = clamp(S.mouseY, MIN_Y, MAX_Y);
       S.x += (tx - S.x) * follow;
       S.y += (ty - S.y) * follow;
       moving = mouseMoved || Math.hypot(tx - S.x, ty - S.y) > 0.05;
     } else if (S.mode === 'home') {
-      S.x += (OX - S.x) * follow;
-      S.y += (OY - S.y) * follow;
-      if (Math.hypot(OX - S.x, OY - S.y) < 0.05) {
-        S.x = OX;
-        S.y = OY;
-        S.mode = 'hold';
-      }
+      S.u = Math.min(1, S.u + dt / HOME);
+      const k = smoother(S.u);
+      S.x = S.from[0] + (OX - S.from[0]) * k;
+      S.y = S.from[1] + (OY - S.from[1]) * k;
+      if (S.u >= 1) [S.mode, S.u] = ['hold', 0];
     }
     if (S.mode === 'hold') moving = false;
 

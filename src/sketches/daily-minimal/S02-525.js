@@ -2,9 +2,9 @@
 // A grainy dark square cut by straight lines, each cut splitting only the
 // piece(s) it runs through, with every shard nudged and turned a little apart.
 // The shards slide back into a sealed square, then break again one cut at a
-// time: a hairline scores across a piece and its halves ease apart. Most
-// breaks are freshly generated; every third replays the original's cuts and
-// rests on the original. A click cuts the shard under the cursor at a random
+// time: a hairline scores across a piece and its halves ease apart. The
+// breaks alternate: a freshly generated one, then a replay of the original's
+// cuts that rests on the original. A click cuts the shard under the cursor at a random
 // angle; after 20s without a cut it heals and breaks back into the original.
 import { dmSketch } from './harness.js';
 import { dotPaperCanvas, paperCanvas } from '../../lib/paper.js';
@@ -105,8 +105,8 @@ const SLIDE = 8;
 const MARGIN = 1.5; // closest two shards may come
 
 // Timing, in seconds.
-const HOLD = 40;
-const HOLD_ORIGINAL = 60;
+const HOLD = 8; // on a generated break, part of the ~36 s away
+const HOLD_ORIGINAL = 20;
 const HEAL = 20;
 const MEND = 4;
 const SEALED = 3;
@@ -554,7 +554,7 @@ function lastStep(arr) {
 }
 
 function nextArrangement(S) {
-  S.cycle = (S.cycle + 1) % 3;
+  S.cycle = (S.cycle + 1) % 2;
   return S.cycle === 0 ? originalArrangement() : randomArrangement();
 }
 
@@ -656,7 +656,7 @@ export default dmSketch({
       if (!cut) continue;
       applyCut(arr, cut);
       arr.off.push(arr.off[K]); // keep the arrangement still under the cursor
-      S.cycle = 2; // heal back into the original
+      S.cycle = 1; // heal back into the original
       enter(p, S, 'break', { step: K + 1, stepEnd: K + 1, restFor: HEAL });
       return;
     }

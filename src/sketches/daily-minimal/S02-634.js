@@ -1,9 +1,10 @@
 // S02-634 magnetic field
 // A white disc in a grainy charcoal square, wrapped in field lines: nested
 // ellipses that all touch the field axis at the disc's center, a matching set
-// on each side. Every 20s the field breathes out one step: each loop swells
-// into the next one's place, a new loop rises out of the disc and the
-// outermost fades at the square's edge, landing back on the original. With
+// on each side. After a 15s rest the field breathes out one step over 8s:
+// each loop swells into the next one's place, a new loop rises out of the
+// disc and the outermost fades at the square's edge, landing back on the
+// original. With
 // someone at the page, the axis turns to point at the cursor, and eases back
 // to 45 degrees when they leave.
 import { dmSketch } from './harness.js';
@@ -30,10 +31,11 @@ const L = [33, 121.5, 210, 302.5, 394.5, 468, 526.5, 573, 604, 626.5, 640, 650];
 const LAST = L.length - 1;
 
 // Timing, in seconds.
-const HOLD = 12;
+const HOLD = 15;
 const MOVE = 8;
+const HOME = 6; // the axis easing back after someone leaves
 
-// Axis easing, per second.
+// Axis easing toward the cursor, per second.
 const TURN = 2.5;
 
 const smoother = (t) => t * t * t * (t * (t * 6 - 15) + 10);
@@ -131,12 +133,23 @@ export default dmSketch({
       }
     }
 
-    const target = S.live
-      ? nearestAxis(S.axis, Math.atan2(-(S.mouseY - CY), S.mouseX - CX))
-      : nearestAxis(S.axis, AXIS);
-    const turning = Math.abs(target - S.axis) > 0.0005;
-    S.axis = turning ? S.axis + (target - S.axis) * Math.min(1, TURN * dt) : target;
-    if (!S.live && !turning) S.axis = AXIS;
+    let turning = false;
+    if (S.live) {
+      const target = nearestAxis(S.axis, Math.atan2(-(S.mouseY - CY), S.mouseX - CX));
+      turning = Math.abs(target - S.axis) > 0.0005;
+      S.axis = turning ? S.axis + (target - S.axis) * Math.min(1, TURN * dt) : target;
+      S.home = null;
+    } else if (S.axis !== AXIS) {
+      // a timed, eased turn back to rest
+      if (!S.home) S.home = { from: S.axis, to: nearestAxis(S.axis, AXIS), t: 0 };
+      S.home.t = Math.min(1, S.home.t + dt / HOME);
+      S.axis = S.home.from + (S.home.to - S.home.from) * smoother(S.home.t);
+      turning = S.home.t < 1;
+      if (!turning) {
+        S.axis = AXIS;
+        S.home = null;
+      }
+    }
 
     draw(p, S, S.phase === 'move' ? smoother(S.u) : 0, S.axis);
 

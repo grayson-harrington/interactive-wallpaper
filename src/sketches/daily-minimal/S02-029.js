@@ -1,8 +1,8 @@
 // S02-029 swirl ring
 // A paper-white ring cut into twelve crescents that swirl into a dark center.
-// Every 30s the swirl breathes: the ring of circles behind it draws in so the
-// vortex winds tight, then swings out loose with the hole wide open, turning
-// two petals round as it goes and landing back on the original. With someone
+// After a 15s rest the swirl breathes for 30s: the ring of circles behind it
+// draws in so the vortex winds tight, then swings out loose with the hole wide
+// open, turning two petals round as it goes and landing back on the original. With someone
 // at the page, the cursor's distance from the center sets how tight it winds,
 // and moving sideways turns it a little; it settles back when they leave.
 import { dmSketch } from './harness.js';
@@ -31,8 +31,9 @@ const STEP = (2 * Math.PI) / N;
 // ring turns TURN, then holds HOLD seconds.
 const K_AMP = 0.35;
 const TURN = 2 * STEP;
-const MOVE = 24;
-const HOLD = 6;
+const MOVE = 30;
+const HOLD = 15;
+const SETTLE = 6; // eased return to the original after someone leaves
 
 // Cursor: k from 1.4 at the center to 0.65 at FAR px out; sideways motion
 // turns the ring TURN_PX radians per px. Both ease in at EASE per second,
@@ -158,28 +159,33 @@ export default dmSketch({
         S.u = 0;
         S.mode = 'hold';
       }
-    } else if (S.mode === 'live' || S.mode === 'settle') {
-      if (S.mode === 'live') {
-        if (!S.live) {
-          // home is the nearest turn that matches the original
-          S.mode = 'settle';
-          S.rotTarget = Math.round(S.rot / STEP) * STEP;
-        }
+    } else if (S.mode === 'live') {
+      if (!S.live) {
+        // home is the nearest turn that matches the original
+        S.mode = 'settle';
+        S.u = 0;
+        S.from = [S.twist, S.rot];
+        S.rotTarget = Math.round(S.rot / STEP) * STEP;
+      } else {
         const d = Math.hypot(S.mouseX - CX, S.mouseY - CY);
         const target = clamp(K_NEAR - (d / FAR) * (K_NEAR - K_FAR), K_FAR, K_NEAR);
         S.twistTarget = target;
         S.twist += (target - S.twist) * ease;
-        if (S.mode === 'live' && Number.isFinite(S.lastMouse[0])) S.rotTarget += (S.mouseX - S.lastMouse[0]) * TURN_PX;
+        if (Number.isFinite(S.lastMouse[0])) S.rotTarget += (S.mouseX - S.lastMouse[0]) * TURN_PX;
+        S.rot += (S.rotTarget - S.rot) * ease;
       }
-      S.rot += (S.rotTarget - S.rot) * ease;
-      if (S.mode === 'settle') {
-        S.twist += (1 - S.twist) * ease;
-        if (Math.abs(S.rotTarget - S.rot) < 0.0005 && Math.abs(S.twist - 1) < 0.001) {
-          S.rot = 0;
-          S.rotTarget = 0;
-          S.twist = 1;
-          S.mode = 'hold';
-        }
+    }
+    if (S.mode === 'settle') {
+      S.u = Math.min(1, S.u + dt / SETTLE);
+      const e = smoother(S.u);
+      S.twist = S.from[0] + (1 - S.from[0]) * e;
+      S.rot = S.from[1] + (S.rotTarget - S.from[1]) * e;
+      if (S.u >= 1) {
+        S.rot = 0;
+        S.rotTarget = 0;
+        S.twist = 1;
+        S.u = 0;
+        S.mode = 'hold';
       }
     }
 

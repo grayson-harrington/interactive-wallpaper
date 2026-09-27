@@ -1,12 +1,13 @@
 // S02-015 moon phases
-// Seven moons in a row, waxing from a new-moon ring to full. Every 20s each
-// moon advances one phase, so the sequence rolls left along the row: the full
-// moon wanes (lit on the other side) back through the crescents to a ring,
-// and after twelve steps the row is the original again. The moons slide as
+// Seven moons in a row, waxing from a new-moon ring to full. After a 15s rest
+// every moon advances one phase at a time, twelve quick steps in about 40s,
+// so the sequence rolls left along the row: the full moon wanes (lit on the
+// other side) back through the crescents to a ring, and after the twelfth
+// step the row is the original again. The moons slide as
 // their shapes change so the gaps between them stay equal, with the middle
 // moon held at the center. With someone at the page, moving the cursor
 // sideways scrubs the phases; when they leave, the row eases to the nearest
-// step and carries on.
+// step and rolls on to the original.
 import { dmSketch } from './harness.js';
 import { dotPaperCanvas, paperCanvas } from '../../lib/paper.js';
 
@@ -44,9 +45,10 @@ const KEYS = [
 const STEPS = 12; // a full cycle: waxing 0..6, then waning 6..12 mirrored
 
 // Timing, in seconds.
-const HOLD = 14;
-const MOVE = 6;
-const SETTLE = 1.5;
+const HOLD = 15; // on the original
+const MOVE = 1.8; // one phase step
+const PAUSE = 1.5; // between steps
+const SETTLE = 6; // to the nearest step after someone leaves
 const SCRUB = 110; // px of cursor travel per phase step
 
 const smoother = (t) => t * t * t * (t * (t * 6 - 15) + 10);
@@ -226,11 +228,12 @@ export default dmSketch({
     if (S.state === 'hold') {
       if (!S.armed) {
         S.armed = true;
+        // rest on the original, only pause between the steps away from it
         p.schedule(() => {
           if (S.state !== 'hold') return;
           [S.state, S.t, S.from, S.to] = ['move', 0, S.pos, S.pos + 1];
           p.loop();
-        }, HOLD * 1000);
+        }, (S.pos === 0 ? HOLD : PAUSE) * 1000);
       }
       p.noLoop();
     } else if (S.state === 'scrub') {

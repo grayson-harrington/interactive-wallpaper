@@ -50,8 +50,8 @@ const ORIGINAL = [
 // Timing, in seconds.
 const GROW = 2.5; // a bridge melting or growing
 const REST = 20; // holding the original
-const PAUSE = 3; // between re-routes
-const WANDER = 12; // re-routes before heading home
+const PAUSE = 2; // between re-routes
+const WANDER = 3; // re-routes before heading home; with the way back, ~38 s away
 const USER_LIFE = 6; // a link drawn with the cursor
 const MAX_DEGREE = 2;
 

@@ -1,11 +1,11 @@
 // S02-341 wavy lines
 // Thirty-five white lines combed down a dark square, each folding into a
 // near-flat run where it crosses a pleat along the square's rising diagonal.
-// Every 30s the fabric stirs: the pleat sways, tilts and loosens and tightens
-// as a slow ripple runs along it, while a soft bulge drifts through the lines,
-// then everything settles back exactly where it was. With someone at the page,
-// the cursor pushes the lines aside like a finger through combed hair, and
-// they spring back when it leaves.
+// After a 15s rest the fabric stirs for 30s: the pleat sways, tilts, loosens
+// and tightens as a slow ripple runs along it, while a soft bulge drifts
+// through the lines, then everything settles back exactly where it was. With
+// someone at the page, the cursor pushes the lines aside like a finger
+// through combed hair, and they spring back when it leaves.
 import { dmSketch, wanderer } from './harness.js';
 import { paperCanvas } from '../../lib/paper.js';
 import { LINES } from './S02-341.lines.js';
@@ -31,8 +31,8 @@ const STRETCH = 0.12;
 const TILT = 0.12;
 const RIPPLE = 40;
 const WAVE = 900; // in w
-const MOVE = 24;
-const HOLD = 6;
+const MOVE = 30;
+const HOLD = 15;
 
 // Bulge: each point moves straight away from the cursor by
 // (distance) * BULGE * exp(-distance^2 / 2 BULGE_R^2): zero under the cursor,
@@ -175,7 +175,7 @@ export default dmSketch({
     S.paper = p.drawingContext.createPattern(tex, 'no-repeat');
     S.paper.setTransform(new DOMMatrix([1, 0, 0, 1, sx, sy]));
 
-    S.wander = wanderer(p, sx + sw / 2, sy + sh / 2, sw * 0.42, 0.006);
+    S.wander = wanderer(p, sx + sw / 2, sy + sh / 2, sw * 0.42, 0.18);
     S.mode = 'hold'; // hold | move
     S.u = 0;
     S.sway = { stretch: 0, tilt: 0, ripple: 0, phase: 0 };

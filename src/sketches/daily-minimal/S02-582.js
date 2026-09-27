@@ -2,7 +2,7 @@
 // A one-point perspective wireframe corridor. At rest the vanishing point sits
 // on the frame's left edge, as in the original; it roams around the frame,
 // returns to rest and holds, or follows the mouse while someone is using the page.
-import { dmSketch, wanderer } from './harness.js';
+import { dmSketch, wanderer, restCycle } from './harness.js';
 
 const bg = 22;
 const ink = 235;
@@ -25,11 +25,12 @@ const RIGHT = 19;
 const BOTTOM = 11;
 const LEFT = 19;
 
-// Ambient cycle, in seconds.
-const HOLD = 5;
-const LEAVE = 3;
-const ROAM = 16;
-const RETURN = 3;
+// Timing, in seconds.
+const HOLD = 15;
+const LEAVE = 5;
+const ROAM = 25;
+const RETURN = 5;
+const FOLLOW = 3; // per second, toward the cursor
 
 // The n + 1 points dividing the edge from a to b into n equal parts.
 function edgePoints(ax, ay, bx, by, n) {
@@ -47,7 +48,6 @@ const MOUTH = [
 
 const clampX = (x) => Math.min(X0 + W, Math.max(X0, x));
 const clampY = (y) => Math.min(Y0 + W, Math.max(Y0, y));
-const smooth = (t) => t * t * (3 - 2 * t);
 
 function drawTunnel(p, vx, vy) {
   p.noFill();
@@ -64,48 +64,45 @@ export default dmSketch({
   art: [X0, Y0, W, W], // the frame
   scale: 1,
   bg,
+  fps: 30,
   init(p, S) {
-    S.wander = wanderer(p, 500, 500, W * 0.6, 0.003);
+    S.wander = wanderer(p, 500, 500, W * 0.6, 0.18);
+    S.cycle = restCycle({ hold: HOLD, leave: LEAVE, away: ROAM, back: RETURN });
     S.v = [...REST];
-    S.state = 'hold';
-    S.t = 0;
+    S.from = [...REST];
     S.wasLive = false;
   },
   frame(p, S) {
-    const dt = Math.min(p.deltaTime, 100) / 1000;
+    const c = S.cycle;
     const w = S.wander();
     const target = [clampX(w[0]), clampY(w[1])];
+    let still = false;
 
     if (S.live) {
+      const k = 1 - Math.exp(-FOLLOW * S.dt);
       const mx = clampX(S.mouseX);
       const my = clampY(S.mouseY);
-      S.v[0] += (mx - S.v[0]) * 0.12;
-      S.v[1] += (my - S.v[1]) * 0.12;
+      S.v[0] += (mx - S.v[0]) * k;
+      S.v[1] += (my - S.v[1]) * k;
+      still = Math.abs(mx - S.v[0]) + Math.abs(my - S.v[1]) < 0.05;
     } else {
-      if (S.wasLive) {
-        S.state = 'return';
-        S.t = 0;
-        S.from = [...S.v];
-      }
-      S.t += dt;
-      if (S.state === 'hold') {
+      if (S.wasLive) c.toRest(RETURN);
+      else c.step(S.dt);
+      if (c.turned && c.phase === 'back') S.from = [...S.v];
+      if (c.phase === 'hold') {
         S.v = [...REST];
-        if (S.t >= HOLD) [S.state, S.t] = ['leave', 0];
-      } else if (S.state === 'leave') {
-        const k = smooth(Math.min(S.t / LEAVE, 1));
-        S.v = [REST[0] + (target[0] - REST[0]) * k, REST[1] + (target[1] - REST[1]) * k];
-        if (S.t >= LEAVE) [S.state, S.t] = ['roam', 0];
-      } else if (S.state === 'roam') {
+        still = true;
+      } else if (c.phase === 'leave') {
+        S.v = [REST[0] + (target[0] - REST[0]) * c.k, REST[1] + (target[1] - REST[1]) * c.k];
+      } else if (c.phase === 'away') {
         S.v = target;
-        if (S.t >= ROAM) [S.state, S.t, S.from] = ['return', 0, [...S.v]];
       } else {
-        const k = smooth(Math.min(S.t / RETURN, 1));
-        S.v = [S.from[0] + (REST[0] - S.from[0]) * k, S.from[1] + (REST[1] - S.from[1]) * k];
-        if (S.t >= RETURN) [S.state, S.t] = ['hold', 0];
+        S.v = [S.from[0] + (REST[0] - S.from[0]) * c.k, S.from[1] + (REST[1] - S.from[1]) * c.k];
       }
     }
     S.wasLive = S.live;
 
     drawTunnel(p, S.v[0], S.v[1]);
+    if (still) S.sleep(S.live ? Infinity : S.cycle.left);
   },
 });

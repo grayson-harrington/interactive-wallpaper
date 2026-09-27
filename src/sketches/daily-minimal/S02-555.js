@@ -4,7 +4,7 @@
 // At rest the source sits on the first tile's corner, as in the original; it
 // wanders around and past the grid, returns and holds, or follows the mouse
 // while someone is using the page.
-import { dmSketch, wanderer } from './harness.js';
+import { dmSketch, wanderer, restCycle } from './harness.js';
 import { dotPaperCanvas, paperCanvas } from '../../lib/paper.js';
 
 const bg = 239;
@@ -26,13 +26,12 @@ const R2 = -0.0494;
 const RMAX = 34;
 const DMAX = -R1 / (2 * R2);
 
-// Ambient cycle, in seconds.
-const HOLD = 6;
-const LEAVE = 4;
+// Timing, in seconds.
+const HOLD = 15;
+const LEAVE = 5;
 const ROAM = 40;
 const RETURN = 5;
-
-const smooth = (t) => t * t * (3 - 2 * t);
+const FOLLOW = 3; // per second, toward the cursor
 
 function biteRadius(d) {
   d = Math.min(d, DMAX);
@@ -90,40 +89,40 @@ export default dmSketch({
   fps: 30,
   init(p, S) {
     S.grid = gridCanvas();
-    S.wander = wanderer(p, 500, 500, 380, 0.004);
+    S.wander = wanderer(p, 500, 500, 380, 0.12);
+    S.cycle = restCycle({ hold: HOLD, leave: LEAVE, away: ROAM, back: RETURN });
     S.v = [...REST];
-    S.state = 'hold';
-    S.t = 0;
+    S.from = [...REST];
     S.wasLive = false;
   },
   frame(p, S) {
-    const dt = Math.min(p.deltaTime, 100) / 1000;
+    const c = S.cycle;
     const target = S.wander();
+    let still = false;
 
     if (S.live) {
-      S.v[0] += (S.mouseX - S.v[0]) * 0.15;
-      S.v[1] += (S.mouseY - S.v[1]) * 0.15;
+      const k = 1 - Math.exp(-FOLLOW * S.dt);
+      S.v[0] += (S.mouseX - S.v[0]) * k;
+      S.v[1] += (S.mouseY - S.v[1]) * k;
+      still = Math.abs(S.mouseX - S.v[0]) + Math.abs(S.mouseY - S.v[1]) < 0.05;
     } else {
-      if (S.wasLive) [S.state, S.t, S.from] = ['return', 0, [...S.v]];
-      S.t += dt;
-      if (S.state === 'hold') {
+      if (S.wasLive) c.toRest(RETURN);
+      else c.step(S.dt);
+      if (c.turned && c.phase === 'back') S.from = [...S.v];
+      if (c.phase === 'hold') {
         S.v = [...REST];
-        if (S.t >= HOLD) [S.state, S.t] = ['leave', 0];
-      } else if (S.state === 'leave') {
-        const k = smooth(Math.min(S.t / LEAVE, 1));
-        S.v = [REST[0] + (target[0] - REST[0]) * k, REST[1] + (target[1] - REST[1]) * k];
-        if (S.t >= LEAVE) [S.state, S.t] = ['roam', 0];
-      } else if (S.state === 'roam') {
+        still = true;
+      } else if (c.phase === 'leave') {
+        S.v = [REST[0] + (target[0] - REST[0]) * c.k, REST[1] + (target[1] - REST[1]) * c.k];
+      } else if (c.phase === 'away') {
         S.v = target;
-        if (S.t >= ROAM) [S.state, S.t, S.from] = ['return', 0, [...S.v]];
       } else {
-        const k = smooth(Math.min(S.t / RETURN, 1));
-        S.v = [S.from[0] + (REST[0] - S.from[0]) * k, S.from[1] + (REST[1] - S.from[1]) * k];
-        if (S.t >= RETURN) [S.state, S.t] = ['hold', 0];
+        S.v = [S.from[0] + (REST[0] - S.from[0]) * c.k, S.from[1] + (REST[1] - S.from[1]) * c.k];
       }
     }
     S.wasLive = S.live;
 
     drawGrid(p, S, S.v[0], S.v[1]);
+    if (still) S.sleep(S.live ? Infinity : c.left);
   },
 });
