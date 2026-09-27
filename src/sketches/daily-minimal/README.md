@@ -95,6 +95,54 @@ Agents load it when asked to port a design. In short:
    run `ONLY=<ID> npm run thumbs`, `npm run build` and `npm run check`, and review
    it with the owner.
 
+## Pacing
+
+Every port follows the same pacing, so the collection feels consistent as a
+wallpaper. Timing is set by this standard. What moves, and how, is decided
+for each piece with the owner.
+
+- **Seconds, not frames.** Get `dt` from `p.deltaTime`, capped at 100 ms, and
+  give every speed per second. Use `fps: 30`, or lower for pieces that change
+  in steps. Put the constants in a `// Timing, in seconds.` block near the top
+  of the file.
+- **The original is the rest pose.** Every piece starts on the archive image
+  and keeps coming back to it. That includes continuous motion (rotations,
+  orbits, flows) and random or generative pieces. Seed them, or store the
+  measured layout, so the rest pose matches the original.
+- **The cycle:**
+
+  | Phase | Duration |
+  |---|---|
+  | Hold on the original | 12–20 s |
+  | Leave, eased | 5–8 s |
+  | Away | 20–40 s |
+  | Return, eased | 5–8 s |
+
+  The leave, away and return can instead be a single eased excursion of
+  30–45 s that leaves and comes back by itself (like `S02-588`).
+- **Holds are still.** During a hold, the only motion allowed is motion that
+  keeps the image looking like the original, such as a seamless loop (like
+  `S02-498`'s drain) or grain. Otherwise, call `noLoop()` and end the hold
+  with `p.schedule()`.
+- **Quick steps are fine inside a sequence.** A bridge melting, a cut scoring
+  or a spring snapping can be quick. Only the leave and the return as a whole
+  must take 5–8 s. In ambient mode, wait at least ~1.5 s between steps.
+- **Interaction.** Follow the cursor with an exponential ease of about 2–3 per
+  second. When input stops, return the piece to rest with a timed, eased move
+  of 5–8 s, then hold. Don't snap back with a fast settle. Local effects
+  around the cursor, like parting threads or a bulge, may spring back
+  quickly.
+
+[harness.js](harness.js) has the helpers:
+
+- `restCycle()` tracks the phases and their eased progress.
+- `coastTo()` brings a turning angle to a stop on its rest angle, without
+  turning back.
+- `S.dt` gives the seconds since the last frame.
+- `S.sleep(secs)` holds still. The harness wakes the piece on time, on input,
+  or when the page goes idle.
+- `wanderer()` takes its speed per second; 0.05–0.2 reads as calm.
+
 ### Ideas for motion
 
 - Rotate nested elements at different rates (like `S02-404`).
@@ -106,10 +154,13 @@ Agents load it when asked to port a design. In short:
 
 ### Ideas for interaction
 
+Interaction is mouse only: no keyboard controls.
+
 - The mouse position controls the main parameter (angle, spacing, phase, viewpoint).
 - Click to reseed or restart, or to step to the next variation.
+- Click to add elements, up to a cap. Once the clicks stop, the extras fade away
+  one at a time, back to the original (like `S02-173` and `S02-446`).
 - Drag to rotate or reposition an element.
-- Keys switch modes or palettes.
 - None: ambient only.
 
 Every interactive piece still needs an ambient mode that looks intentional

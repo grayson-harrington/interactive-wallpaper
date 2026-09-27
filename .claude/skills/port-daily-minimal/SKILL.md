@@ -26,6 +26,9 @@ Don't write sketch code until steps 1–3 are done and the owner has confirmed e
 ## 1. Find the image
 
 - Check `ported.csv`. If the ID is already there, say so and ask whether to revise it.
+  A revision goes through steps 2–5 again. In step 2, also compare the port's current
+  rest pose (its thumbnail in `public/thumbs/`) with the archive image, and list
+  every difference.
 - Search every board: `find "<downloads>" -name '<ID>.*'`. A design can be on several
   boards; any copy will do. Also grep its row in `rename_manifest.csv`.
 - Mind the series. `S01-404` and `S02-404` are different designs. If the owner gives
@@ -81,18 +84,29 @@ Use one AskUserQuestion call with a question for **animation** and one for
 the README for example kinds). Put your pick first and mark it "(Recommended)". Each
 option says what the viewer sees.
 
-The answers usually leave something open, such as the path of a wandering element,
-the speed, the loop length, or how often it returns to the original. Ask a short
-follow-up round the same way.
+The answers usually leave something open, such as the path of a wandering element
+or what the away phase does. Ask a short follow-up round the same way. Don't offer
+timing outside the pacing standard. If a design seems to need it, ask the owner
+about the exception directly.
 
 Rules for every piece:
 
+- **Follow the pacing standard** in the
+  [README](../../../src/sketches/daily-minimal/README.md), in its Pacing section:
+  - Hold on the original for 12–20 s.
+  - Leave over 5–8 s (eased), stay away for 20–40 s, and return over 5–8 s (eased).
+    A single eased excursion of 30–45 s can replace those three phases.
+  - Time everything in seconds at 30 fps.
+  - Hold still with `noLoop()`.
+  - Return to rest over 5–8 s (eased) when input stops.
 - **The original is the rest pose.** Start on it, and have the animation return to it
-  now and then or pass through it. The still image should be a recognizable frame.
+  exactly. The still image must match the archive image. That includes random and
+  generative designs: seed them or store the measured layout.
 - **Ambient mode must look intentional.** Plash may not forward the mouse, so
-  interactive pieces also run without input. Switch on `S.live`, use `wanderer()`
-  from the harness as a stand-in for the mouse, and when input stops, ease back into
-  ambient instead of jumping.
+  interactive pieces also run without input. Switch on `S.live`, and use `wanderer()`
+  from the harness as a stand-in for the mouse. `restCycle()` tracks the ambient
+  phases.
+- **Mouse only.** Interaction uses the mouse (position, clicks, drags), never keys.
 - Keep motion calm and loopable. It runs all day as a wallpaper.
 
 Record the confirmed description and choices in the plan before building.
