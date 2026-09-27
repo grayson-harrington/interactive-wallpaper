@@ -18,6 +18,7 @@ import S02_498 from './S02-498.js';
 import S02_525 from './S02-525.js';
 import S02_555 from './S02-555.js';
 import S02_582 from './S02-582.js';
+import S02_634 from './S02-634.js';
 import IF_004 from './IF-004.js';
 
 export const dailyMinimal = [
@@ -37,5 +38,6 @@ export const dailyMinimal = [
   { id: 'S02-525', label: 'S02-525 Broken Square', sketch: S02_525 },
   { id: 'S02-555', label: 'S02-555 Quarter Bites', sketch: S02_555 },
   { id: 'S02-582', label: 'S02-582 Wandering Tunnel', sketch: S02_582 },
+  { id: 'S02-634', label: 'S02-634 Magnetic Field', sketch: S02_634 },
   { id: 'IF-004', label: 'IF-004 Cube Triangle', sketch: IF_004 },
 ];
