@@ -1,4 +1,4 @@
-// Traditional Wallpaper: an hourly photo slideshow of images/wallpapers/.
+// Traditional Wallpaper: an hourly photo slideshow of images/static_wallpapers/.
 //
 // Plain DOM, no canvas: two stacked full-screen <img> layers crossfade over
 // ~2.5s. The file list comes from the server's live /api/wallpapers route and

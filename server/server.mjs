@@ -4,7 +4,7 @@
 //   GET  /api/wallpapers     live readdir of the photo folder (no rebuild needed)
 //   GET  /wallpapers/<file>  the photos themselves
 //   GET  /api/voronoi-images, /voronoi-images/<file>  same, for images/voronoi/
-//   (folders: images/wallpapers and images/voronoi; override with
+//   (folders: images/static_wallpapers and images/voronoi; override with
 //    WALLPAPER_DIR / VORONOI_DIR)
 //   GET  /api/state          small shared key/value state (current selection,
 //   PUT  /api/state          auto-cycle, L-system settings, input-test report)
@@ -20,7 +20,7 @@ import { fileURLToPath } from 'node:url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const DIST = path.join(ROOT, 'dist');
-const WALLPAPER_DIR = path.resolve(process.env.WALLPAPER_DIR || path.join(ROOT, 'images', 'wallpapers'));
+const WALLPAPER_DIR = path.resolve(process.env.WALLPAPER_DIR || path.join(ROOT, 'images', 'static_wallpapers'));
 const VORONOI_DIR = path.resolve(process.env.VORONOI_DIR || path.join(ROOT, 'images', 'voronoi'));
 // live image folders: /api/<name> lists, /<name>/<file> serves
 const IMAGE_DIRS = { wallpapers: WALLPAPER_DIR, 'voronoi-images': VORONOI_DIR };

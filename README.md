@@ -38,7 +38,7 @@ npm run install-agent      # launchd agent: starts the server at login, restarts
 1. If the project lives under `~/Documents` (or Desktop/Downloads), macOS will ask whether
    **node** may access that folder. Allow it; until you do, the server can't start.
    Check it's up with `curl localhost:4747/api/health`.
-2. Put images in `images/wallpapers/` and `images/voronoi/` (see below).
+2. Put images in `images/static_wallpapers/` and `images/voronoi/` (see below).
 3. In Plash, add the website `http://localhost:4747`.
 4. Turn Plash's **Browsing Mode** off for everyday use. With it on, the wallpaper only
    shows on one Space and the others show your normal wallpaper.
@@ -73,7 +73,7 @@ version and a browser tab gets the interactive one, from the same page.
 
 | Folder | Used by |
 |---|---|
-| `images/wallpapers/` | **Traditional Wallpaper** photos |
+| `images/static_wallpapers/` | **Traditional Wallpaper** photos |
 | `images/voronoi/` | **Voronoi Images** source pictures (right-click the piece to use any file instead) |
 
 Drop JPEG/PNG/GIF/WebP/HEIC files in; they join the rotation on the next switch, with no rebuild.
@@ -94,7 +94,7 @@ starts empty. To keep images elsewhere, set `WALLPAPER_DIR` / `VORONOI_DIR` in t
 ## Layout
 
 - `server/server.mjs`: a dependency-free Node server. It serves `dist/` and the live image folders
-  (`images/wallpapers` and `images/voronoi` via `/api/wallpapers` and `/api/voronoi-images`, re-read on every request),
+  (`images/static_wallpapers` and `images/voronoi` via `/api/wallpapers` and `/api/voronoi-images`, re-read on every request),
   and `/api/state` holds the shared state.
 - `src/shell/`: the host lifecycle, the registry of pieces, and state sync. Every sketch is
   instantiated up front, only the active one loops, and hidden ones are `display: none`.

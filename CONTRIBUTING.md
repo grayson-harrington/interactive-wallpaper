@@ -100,7 +100,7 @@ This runs all day as a desktop background, so keep it cheap:
 
 ## Images
 
-- `images/wallpapers/` and `images/voronoi/` are read live by the server, with no rebuild needed.
+- `images/static_wallpapers/` and `images/voronoi/` are read live by the server, with no rebuild needed.
   Their contents are personal and gitignored; don't commit images there.
 - Anything under `public/` is bundled at build time. Only use it for fixed assets (fonts, thumbnails).
 
