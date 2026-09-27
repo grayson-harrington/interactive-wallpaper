@@ -15,6 +15,7 @@ import S02_446 from './S02-446.js';
 import S02_459 from './S02-459.js';
 import S02_474 from './S02-474.js';
 import S02_481 from './S02-481.js';
+import S02_484 from './S02-484.js';
 import S02_498 from './S02-498.js';
 import S02_525 from './S02-525.js';
 import S02_555 from './S02-555.js';
@@ -36,6 +37,7 @@ export const dailyMinimal = [
   { id: 'S02-459', label: 'S02-459 Simple Cubic', sketch: S02_459 },
   { id: 'S02-474', label: 'S02-474 Popup Lines', sketch: S02_474 },
   { id: 'S02-481', label: 'S02-481 Golden Spiral', sketch: S02_481 },
+  { id: 'S02-484', label: 'S02-484 Wavy Threads', sketch: S02_484 },
   { id: 'S02-498', label: 'S02-498 Gravity Well', sketch: S02_498 },
   { id: 'S02-525', label: 'S02-525 Broken Square', sketch: S02_525 },
   { id: 'S02-555', label: 'S02-555 Quarter Bites', sketch: S02_555 },
