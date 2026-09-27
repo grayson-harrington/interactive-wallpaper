@@ -2,6 +2,7 @@
 // thumbnail grid (thumbnails live in public/thumbs/<id>.png, made by
 // `npm run thumbs`).
 
+import S02_015 from './S02-015.js';
 import S02_045 from './S02-045.js';
 import S02_083 from './S02-083.js';
 import S02_173 from './S02-173.js';
@@ -25,6 +26,7 @@ import S02_634 from './S02-634.js';
 import IF_004 from './IF-004.js';
 
 export const dailyMinimal = [
+  { id: 'S02-015', label: 'S02-015 Moon Phases', sketch: S02_015 },
   { id: 'S02-045', label: 'S02-045 Waves Through Circle', sketch: S02_045 },
   { id: 'S02-083', label: 'S02-083 Offset Rings', sketch: S02_083 },
   { id: 'S02-173', label: 'S02-173 Max Line Segments', sketch: S02_173 },
