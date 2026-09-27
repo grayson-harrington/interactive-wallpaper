@@ -9,6 +9,7 @@ import S02_083 from './S02-083.js';
 import S02_173 from './S02-173.js';
 import S02_181 from './S02-181.js';
 import S02_238 from './S02-238.js';
+import S02_341 from './S02-341.js';
 import S02_368 from './S02-368.js';
 import S02_401 from './S02-401.js';
 import S02_404 from './S02-404.js';
@@ -35,6 +36,7 @@ export const dailyMinimal = [
   { id: 'S02-173', label: 'S02-173 Max Line Segments', sketch: S02_173 },
   { id: 'S02-181', label: 'S02-181 Glimpse Beyond', sketch: S02_181 },
   { id: 'S02-238', label: 'S02-238 Fractal Cube', sketch: S02_238 },
+  { id: 'S02-341', label: 'S02-341 Wavy Lines', sketch: S02_341 },
   { id: 'S02-368', label: 'S02-368 Rectangles in Circle', sketch: S02_368 },
   { id: 'S02-401', label: 'S02-401 Lines Through Circle', sketch: S02_401 },
   { id: 'S02-404', label: 'S02-404 Rotating Concentric Circles', sketch: S02_404 },
