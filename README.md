@@ -83,9 +83,6 @@ Server log: `~/Library/Logs/interactive-wallpaper.log`.
   through the server, so Plash follows within a few seconds. The same goes for L-System settings.
 - **URL options:** `?sketch=<id>&sub=<dm id>` starts on a piece, `?follow=0` ignores changes
   made elsewhere, `?ui=0` hides the menu, and `?mode=ambient|interactive` forces a mode.
-- **Input test:** `http://localhost:4747/spike.html` shows which of mouse move, click and
-  keyboard actually reach the page inside Plash. Results are also saved to the server
-  (`curl localhost:4747/api/state`).
 
 ## Ambient vs interactive
 

@@ -7,7 +7,7 @@
 //   (folders: images/static_wallpapers and images/voronoi; override with
 //    WALLPAPER_DIR / VORONOI_DIR)
 //   GET  /api/state          small shared key/value state (current selection,
-//   PUT  /api/state          auto-cycle, L-system settings, input-test report)
+//   PUT  /api/state          auto-cycle, L-system settings)
 //                            so a browser tab can steer what Plash shows.
 //
 // No dependencies: plain node:http so launchd can run it with nothing but node.
