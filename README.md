@@ -6,15 +6,24 @@ Some are ports of my older Processing and Python projects and some are new work,
 the collection keeps changing. A menu in the corner picks which piece is showing, and
 only that piece runs.
 
+The biggest part of it is **Daily Minimal**: animated, interactive versions of Pierre
+Voisin's Daily Minimal designs. It's actively being added to, and it will keep growing.
+
 ## The pieces
 
-| Piece | What it is |
+The menu lists the two main pieces first, then a faint divider, then everything else.
+
+| Main pieces | What it is |
+|---|---|
+| Traditional Wallpaper | Hourly crossfading slideshow of your photos; click for the next one |
+| Daily Minimal | Animated ports of Daily Minimal designs, chosen from a thumbnail grid (see below) |
+
+| Other pieces | What it is |
 |---|---|
 | Fractal Tree | Recursive tree that sways; follows the mouse when you move it |
 | Voronoi Images | Photos rebuilt from Voronoi cells. Click: next image · right-click: pick a file · adjustable cell count |
 | Procedural Terrain | A sea of generated islands with biome coloring, rising tile by tile |
 | Tree Patterns | A branching tree grown by colored-node rules, with an adjuster panel and color legend |
-| Daily Minimal | Animated ports of Daily Minimal designs, chosen from a thumbnail grid |
 | Bicycle Galaxy | A stationary bike whose rotating parts leave trails, as if it were riding forward |
 | Game of Life | Self-reseeding soup; click or type to use the full editor (paint, copy/paste, colors) |
 | Flow Pipes | Rotate-the-pipes puzzle with flowing water; solves itself in ambient mode |
@@ -22,8 +31,24 @@ only that piece runs.
 | Flocking | Boids (separation, alignment, cohesion); click to add a boid |
 | Flow Field | Thousands of hairline strokes following Perlin noise, with a rolling erase |
 | Spinodal Decomposition | Phase-separation simulation that settles, holds, and reseeds |
-| Traditional Wallpaper | Hourly crossfading slideshow of your photos; click for the next one |
 | L-System Tool | L-system editor with presets, rules, angle, iterations, colors |
+
+## Daily Minimal
+
+[Daily Minimal](https://dailyminimal.com) was Pierre Voisin's project of a new geometric
+design every day. Each port here takes one of those static designs and animates it:
+it starts on the original image, moves on its own (a slow orbit, rolling phases, links
+that melt and re-form), and answers the mouse when you use the page. The original design
+is always the rest pose the animation comes back to.
+
+- **Picking one:** choose Daily Minimal in the menu, then a design from the thumbnail
+  grid (▦). The grid has its own auto-cycle that moves between designs.
+- **What's there:** [ported.csv](src/sketches/daily-minimal/ported.csv) lists every port
+  with its design ID, title and date. New ones are added regularly.
+- **Credit:** each design is shown with its ID and "Daily Minimal by Pierre Voisin" in the
+  bottom-left corner. The ports are an unofficial, non-commercial tribute; see the
+  [Daily Minimal README](src/sketches/daily-minimal/README.md) for attribution, the source
+  archive and how ports are made.
 
 ## First-time setup
 
@@ -47,8 +72,8 @@ Server log: `~/Library/Logs/interactive-wallpaper.log`.
 
 ## Choosing what shows
 
-- **Corner menu** (top right, fades out when idle): the piece dropdown, the Daily Minimal
-  grid (▦), and auto-cycle, which switches to a random piece every 5 min – 2 h.
+- **Corner menu** (top right, fades out when idle): the piece dropdown (Traditional
+  Wallpaper and Daily Minimal first), the Daily Minimal grid (▦), and auto-cycle, which switches to a random piece every 5 min – 2 h.
 - **Daily Minimal auto-cycle** (in the ▦ grid): while a Daily Minimal is showing, switches
   to a random other one on its own interval. It works with global auto-cycle on or off.
   With both on, the global cycle still moves on to another piece once its interval has

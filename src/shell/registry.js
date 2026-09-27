@@ -1,4 +1,5 @@
-// Every selectable piece. Order here is the order in the dropdown.
+// Every selectable piece. Order here is the order in the dropdown: the
+// featured pieces first, then a divider, then the rest.
 
 import fractalTree from '../sketches/fractal-tree.js';
 import voronoi from '../sketches/voronoi.js';
@@ -18,11 +19,12 @@ import lSystem from '../sketches/l-system.js';
 export const DAILY_MINIMAL = 'daily-minimal';
 
 export const entries = [
+  { id: 'photos', label: 'Traditional Wallpaper', mount: mountPhotos, featured: true },
+  { id: DAILY_MINIMAL, label: 'Daily Minimal', group: dailyMinimal, featured: true },
   { id: 'fractal-tree', label: 'Fractal Tree', sketch: fractalTree },
   { id: 'voronoi', label: 'Voronoi Images', sketch: voronoi },
   { id: 'terrain', label: 'Procedural Terrain', sketch: terrain },
   { id: 'tree-patterns', label: 'Tree Patterns', sketch: treePatterns },
-  { id: DAILY_MINIMAL, label: 'Daily Minimal', group: dailyMinimal },
   { id: 'bicycle-galaxy', label: 'Bicycle Galaxy', sketch: bicycleGalaxy },
   { id: 'game-of-life', label: 'Game of Life', sketch: gameOfLife },
   { id: 'flow-pipes', label: 'Flow Pipes', sketch: flowPipes },
@@ -30,7 +32,6 @@ export const entries = [
   { id: 'flocking', label: 'Flocking', sketch: flocking },
   { id: 'flow-field', label: 'Flow Field', sketch: flowField },
   { id: 'spinodal', label: 'Spinodal Decomposition', sketch: spinodal },
-  { id: 'photos', label: 'Traditional Wallpaper', mount: mountPhotos },
   { id: 'l-system', label: 'L-System Tool', sketch: lSystem },
 ];
 

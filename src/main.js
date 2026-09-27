@@ -102,11 +102,18 @@ function labelFor(sel) {
 
 // ---- dropdown --------------------------------------------------------------
 
-for (const entry of entries) {
+for (const [i, entry] of entries.entries()) {
   const opt = document.createElement('option');
   opt.value = entry.id;
   opt.textContent = entry.label;
   pick.append(opt);
+  // a faint line after the featured pieces
+  if (entry.featured && !entries[i + 1]?.featured) {
+    const line = document.createElement('option');
+    line.disabled = true;
+    line.textContent = '──────────';
+    pick.append(line);
+  }
 }
 
 pick.addEventListener('change', () => {
