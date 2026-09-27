@@ -13,9 +13,9 @@ palette and idea of each piece belong to Pierre Voisin. The code here only adds 
 and interaction. Credit Pierre Voisin / Daily Minimal wherever these pieces
 are shown or shared.
 
-A few Série 2 pieces (e.g. S02-073, S02-085) were animated by
-**David Rubio of Neutro studio** ([weareneutro.com](https://www.weareneutro.com)).
-Credit Neutro studio too if one of those is ported.
+Some designs were also animated by others, as their captions note. Those
+animations don't need attribution here: the ports animate the static designs
+from scratch.
 
 **These ports are an unofficial, non-commercial personal tribute.** They are
 not affiliated with or endorsed by Pierre Voisin or Daily Minimal. The original
