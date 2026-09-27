@@ -3,6 +3,7 @@
 // `npm run thumbs`).
 
 import S02_045 from './S02-045.js';
+import S02_083 from './S02-083.js';
 import S02_173 from './S02-173.js';
 import S02_181 from './S02-181.js';
 import S02_238 from './S02-238.js';
@@ -23,6 +24,7 @@ import IF_004 from './IF-004.js';
 
 export const dailyMinimal = [
   { id: 'S02-045', label: 'S02-045 Waves Through Circle', sketch: S02_045 },
+  { id: 'S02-083', label: 'S02-083 Offset Rings', sketch: S02_083 },
   { id: 'S02-173', label: 'S02-173 Max Line Segments', sketch: S02_173 },
   { id: 'S02-181', label: 'S02-181 Glimpse Beyond', sketch: S02_181 },
   { id: 'S02-238', label: 'S02-238 Fractal Cube', sketch: S02_238 },
