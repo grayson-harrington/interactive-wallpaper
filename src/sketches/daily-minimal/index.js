@@ -10,6 +10,7 @@ import S02_238 from './S02-238.js';
 import S02_368 from './S02-368.js';
 import S02_401 from './S02-401.js';
 import S02_404 from './S02-404.js';
+import S02_433 from './S02-433.js';
 import S02_437 from './S02-437.js';
 import S02_446 from './S02-446.js';
 import S02_459 from './S02-459.js';
@@ -32,6 +33,7 @@ export const dailyMinimal = [
   { id: 'S02-368', label: 'S02-368 Rectangles in Circle', sketch: S02_368 },
   { id: 'S02-401', label: 'S02-401 Lines Through Circle', sketch: S02_401 },
   { id: 'S02-404', label: 'S02-404 Rotating Concentric Circles', sketch: S02_404 },
+  { id: 'S02-433', label: 'S02-433 Linked Circles', sketch: S02_433 },
   { id: 'S02-437', label: 'S02-437 Trails in Triangle', sketch: S02_437 },
   { id: 'S02-446', label: 'S02-446 Controlled Noise', sketch: S02_446 },
   { id: 'S02-459', label: 'S02-459 Simple Cubic', sketch: S02_459 },
