@@ -1,25 +1,35 @@
 // S02-238 fractal cube
-// A slowly tumbling cube of paper-textured faces. Each iteration replaces
-// every box with the 20 sub-boxes of a Menger sponge step (depth 1-3).
-// The original iterated on click (still does); in ambient mode it iterates on
-// its own, holds at full depth, then starts over.
+// A Menger sponge of paper-textured faces. At rest it is the original: one
+// sponge step (20 boxes) seen straight down a body diagonal, flat, like an
+// isometric drawing. After a 15s hold it starts to tumble, subdivides once
+// more partway through, merges back, and coasts to a stop on the original
+// view. A click subdivides it (or merges it back) at any time.
 //
 // WebGL: the boxes for the current depth are baked into three p5.Geometry
 // objects (one per paper texture) instead of re-emitting ~2400 textured quads
 // every frame.
 
-import { SIZE } from './harness.js';
+import { SIZE, restCycle, coastTo } from './harness.js';
 import { paperCanvas } from '../../lib/paper.js';
 
 const backC = 239;
 const ORIGINAL = 600;
-// Sizing like the harness: the start pose is the cube (side 250) face-on, which
-// p5's default perspective camera shows about 1.47x larger, so ~367 across.
-const ART = 367;
+// Sizing like the harness: the rest pose (a cube of side 250 seen down its
+// diagonal) has a bounding box with the area of a square about 347 across.
+const ART = 347;
 const SCALE = 1; // per-piece size tuning
-const maxDepth = 3;
-const STEP_FRAMES = 45 * 7; // ~7s per depth in ambient mode
-const HOLD_FRAMES = 45 * 16;
+const REST_DEPTH = 2;
+const MAX_DEPTH = 3;
+// Rest view: down a body diagonal, from below as in the original.
+const REST_X = Math.atan(1 / Math.SQRT2);
+const REST_Y = -Math.PI / 4;
+
+// Timing, in seconds.
+const HOLD = 15;
+const LEAVE = 6; // tumbling up to speed
+const AWAY = 30; // one more subdivision a third of the way in, merged back at two thirds
+const BACK = 7; // coasting to a stop on the rest view
+const SPIN = [0.225, 0.19]; // tumble, radians per second about x and y
 
 function subdivide(boxes) {
   const out = [];
@@ -37,8 +47,10 @@ export default function fractalCube(p) {
   let geoms = [];
   let depth = 1;
   let boxes;
-  let timer = 0;
-  let angle = 0;
+  let rot = [REST_X, REST_Y];
+  let home = null;
+  let armed = false;
+  const cycle = restCycle({ hold: HOLD, leave: LEAVE, away: AWAY, back: BACK });
 
   function paperTexture(base) {
     // rendered at 2x the original so the grain stays crisp on large/retina screens
@@ -87,18 +99,9 @@ export default function fractalCube(p) {
     );
   }
 
-  function reset() {
-    depth = 1;
+  function setDepth(d) {
     boxes = [[0, 0, 0, 250]];
-    timer = 0;
-    bake();
-  }
-
-  function iterate() {
-    if (depth === maxDepth) return;
-    boxes = subdivide(boxes);
-    depth++;
-    timer = 0;
+    for (depth = 1; depth < d; depth++) boxes = subdivide(boxes);
     bake();
   }
 
@@ -106,35 +109,65 @@ export default function fractalCube(p) {
     // full retina density keeps edges smooth
     p.pixelDensity(Math.min(2, window.devicePixelRatio || 1));
     p.createCanvas(p.windowWidth, p.windowHeight, p.WEBGL);
-    p.frameRate(45);
+    p.frameRate(30);
     p.textureMode(p.NORMAL);
     textures = [paperTexture(218), paperTexture(118), paperTexture(45)];
-    reset();
+    setDepth(REST_DEPTH);
   };
 
   p.draw = () => {
-    if (!p.interactive()) {
-      timer++;
-      if (depth < maxDepth && timer > STEP_FRAMES) iterate();
-      else if (depth === maxDepth && timer > HOLD_FRAMES) reset();
+    const dt = Math.min(p.deltaTime, 100) / 1000;
+    const c = cycle.step(dt);
+    if (c.phase === 'leave' || c.phase === 'away') {
+      const rate = c.phase === 'leave' ? c.k : 1;
+      rot[0] += SPIN[0] * rate * dt;
+      rot[1] += SPIN[1] * rate * dt;
+      if (c.phase === 'away') {
+        const want = c.u > 1 / 3 && c.u < 2 / 3 ? MAX_DEPTH : REST_DEPTH;
+        if (!p.interactive() && depth !== want) setDepth(want);
+      }
+    } else if (c.phase === 'back') {
+      if (c.turned) {
+        home = [coastTo(rot[0], SPIN[0], REST_X, BACK), coastTo(rot[1], SPIN[1], REST_Y, BACK)];
+        if (depth !== REST_DEPTH) setDepth(REST_DEPTH);
+      }
+      rot = [home[0](c.u), home[1](c.u)];
+    } else {
+      rot = [REST_X, REST_Y];
     }
 
-    angle += 0.005;
     p.background(backC);
     const k = (SIZE * SCALE * Math.min(p.width, p.height)) / ART;
+    p.ortho(-p.width / 2, p.width / 2, -p.height / 2, p.height / 2, -5000, 5000);
     p.scale(k);
-    p.rotateX(angle);
-    p.rotateY(angle);
+    p.rotateX(rot[0]);
+    p.rotateY(rot[1]);
     p.noStroke();
     for (let i = 0; i < 3; i++) {
       p.texture(textures[i]);
       p.model(geoms[i]);
     }
+
+    if (c.phase === 'hold') {
+      if (!armed) {
+        armed = true;
+        p.schedule(() => {
+          armed = false;
+          cycle.skip();
+          p.loop();
+        }, c.left * 1000);
+      }
+      p.noLoop();
+    }
+  };
+
+  p.onActivate = () => {
+    armed = false; // the hold timer was cancelled when hidden
   };
 
   p.mouseReleased = () => {
-    if (depth === maxDepth) reset();
-    else iterate();
+    setDepth(depth === REST_DEPTH ? MAX_DEPTH : REST_DEPTH);
+    p.redraw();
   };
 
   p.windowResized = () => {

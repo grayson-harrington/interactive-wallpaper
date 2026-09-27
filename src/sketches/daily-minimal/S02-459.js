@@ -1,7 +1,7 @@
 // S02-459 simple cubic
 // A simple-cubic unit cell of paper "bobbles" joined by knocked-out bonds.
-// Grab a bobble and it springs back when released. In ambient mode an
-// invisible hand occasionally plucks one.
+// Grab a bobble and it springs back when released. In ambient mode it rests
+// on the original, and every 12-20s an invisible hand plucks one.
 import { dmSketch } from './harness.js';
 import { paperCanvas, fillPathWithTexture } from '../../lib/paper.js';
 
@@ -14,6 +14,12 @@ const backC = 239;
 const primaryAlpha = 35;
 const secondaryAlpha = 100;
 const numPaperParticles = 20;
+
+// Timing, in seconds. The spring runs in fixed steps at the original's 60fps.
+const REST = [12, 20]; // between plucks
+const DRAG = [0.4, 0.75]; // pulling a bobble out
+const PULL_HOLD = [0.25, 0.67]; // holding it before letting go
+const SPRING_HZ = 60;
 
 const rand = (a, b) => a + Math.random() * (b - a);
 
@@ -78,6 +84,7 @@ export default dmSketch({
   art: [74, 60, 366, 366], // the unit cell
   scale: 1,
   bg: backC,
+  fps: 30,
   init(p, S) {
     const img = bobbleImage(ballS);
     const sx = (sideLength * 2) / 5;
@@ -89,8 +96,10 @@ export default dmSketch({
       [-halfSide + sx, -halfSide + sy], [halfSide + sx, -halfSide + sy], [halfSide + sx, halfSide + sy], [-halfSide + sx, halfSide + sy],
     ];
     S.bobbles = corners.map(([x, y]) => bobble(x + cx, y + cy, img));
-    S.nextPluck = 90;
+    S.nextPluck = rand(...REST);
     S.pluck = null;
+    S.acc = 0;
+    S.settled = true;
   },
   frame(p, S) {
     p.background(backC);
@@ -99,7 +108,7 @@ export default dmSketch({
     if (!S.live) {
       if (S.pluck) {
         const pl = S.pluck;
-        pl.t++;
+        pl.t += S.dt;
         // ease the pull point out from rest instead of jumping there
         const k = smoothstep(Math.min(1, pl.t / pl.dragLen));
         pl.b.gx = pl.b.rx + (pl.tx - pl.b.rx) * k;
@@ -108,7 +117,7 @@ export default dmSketch({
           pl.b.grabbed = false;
           S.pluck = null;
         }
-      } else if (--S.nextPluck <= 0) {
+      } else if (S.settled && (S.nextPluck -= S.dt) <= 0) {
         const b = S.bobbles[Math.floor(Math.random() * S.bobbles.length)];
         const a = Math.random() * Math.PI * 2;
         const r = rand(80, 200);
@@ -120,10 +129,10 @@ export default dmSketch({
           t: 0,
           tx: b.rx + Math.cos(a) * r,
           ty: b.ry + Math.sin(a) * r,
-          dragLen: Math.floor(rand(25, 45)),
-          hold: Math.floor(rand(15, 40)),
+          dragLen: rand(...DRAG),
+          hold: rand(...PULL_HOLD),
         };
-        S.nextPluck = Math.floor(rand(150, 420));
+        S.nextPluck = rand(...REST);
       }
     } else if (S.pluck) {
       S.pluck.b.grabbed = false;
@@ -131,11 +140,7 @@ export default dmSketch({
     }
 
     const ctx = p.drawingContext;
-    for (const b of S.bobbles) {
-      ctx.drawImage(b.img, b.x - b.img.width / 2, b.y - b.img.height / 2);
-      const [mx, my] = b === S.pluck?.b ? [b.gx, b.gy] : [S.mouseX, S.mouseY];
-      update(b, mx, my);
-    }
+    for (const b of S.bobbles) ctx.drawImage(b.img, b.x - b.img.width / 2, b.y - b.img.height / 2);
 
     p.stroke(backC);
     p.strokeCap(p.SQUARE);
@@ -144,8 +149,24 @@ export default dmSketch({
     p.noStroke();
     p.fill(backC);
     for (const b of S.bobbles) p.ellipse(b.x, b.y, lineS, lineS);
+
+    // the spring, in fixed steps
+    S.acc = Math.min(S.acc + S.dt * SPRING_HZ, 6);
+    for (; S.acc >= 1; S.acc--) {
+      for (const b of S.bobbles) {
+        const [mx, my] = b === S.pluck?.b ? [b.gx, b.gy] : [S.mouseX, S.mouseY];
+        update(b, mx, my);
+      }
+    }
+
+    // everything at rest: the wait for the next pluck runs from here, asleep
+    // (input wakes it sooner)
+    const still = !S.pluck && S.bobbles.every((b) => !b.grabbed && b.x === b.rx && b.y === b.ry);
+    S.settled = still;
+    if (still) S.sleep(S.live ? Infinity : S.nextPluck);
   },
   mousePressed(p, S) {
+    p.loop();
     if (S.pluck) {
       S.pluck.b.grabbed = false;
       S.pluck = null;

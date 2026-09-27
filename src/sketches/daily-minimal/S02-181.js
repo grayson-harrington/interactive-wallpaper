@@ -1,19 +1,29 @@
 // S02-181 glimpse beyond
 // Two diamonds slide along a line; where they overlap, a window of dark paper
-// opens up.
-import { dmSketch } from './harness.js';
+// opens up. At rest they sit where the original has them. After a 15s hold
+// they ease into a noisy slide along the line, wander, then ease back.
+import { dmSketch, restCycle } from './harness.js';
 import { paperCanvas, fillPathWithTexture } from '../../lib/paper.js';
 
 const backC = 239;
 const lineC = 30;
 const lineWeight = 3.5;
 
-function makeSquare(p, S) {
-  const height = S.oh;
-  const d = p.random(height / 8, height / 2);
-  let s = p.random(-2, 2);
-  s = s > 0 ? s + 1 : s - 1;
-  return { d, x: p.random(S.start + d, S.stop - d), y: height / 2, s };
+// The diamonds in the original: center x and half-diagonal, measured.
+const REST = [
+  [295.5, 91.5],
+  [359.7, 67.2],
+];
+
+// Timing, in seconds.
+const HOLD = 15;
+const LEAVE = 6;
+const AWAY = 28;
+const BACK = 6;
+const NOISE = 0.2; // noise time per second: the original's frame / 300 at 60fps
+
+function makeSquare(S, [x, d]) {
+  return { d, x, rest: x, y: S.oh / 2 };
 }
 
 function show(p, q) {
@@ -53,16 +63,28 @@ export default dmSketch({
   art: [100, 0, 600, 300], // the track the diamonds slide along, at their largest
   scale: 1,
   bg: backC,
+  fps: 30,
   init(p, S) {
-    p.randomSeed(32333);
     S.paperBack = paperCanvas(S.ow, S.oh, { base: lineC, specks: (S.ow * S.oh) / 500 });
     S.start = S.ow / 8;
     S.stop = S.ow - S.ow / 8;
-    S.squares = [makeSquare(p, S), makeSquare(p, S)];
-    S.frame = 0;
+    S.squares = REST.map((r) => makeSquare(S, r));
+    S.t = p.random(1000);
+    S.cycle = restCycle({ hold: HOLD, leave: LEAVE, away: AWAY, back: BACK });
   },
   frame(p, S) {
-    S.frame++;
+    const c = S.cycle.step(S.dt);
+    if (c.phase === 'leave' || c.phase === 'away') S.t += NOISE * (c.phase === 'leave' ? c.k : 1) * S.dt;
+    for (const q of S.squares) {
+      const slide = p.map(p.noise(S.t + q.d * q.d * q.d), 0, 1, S.start + q.d, S.stop - q.d);
+      if (c.phase === 'leave') q.x = q.rest + (slide - q.rest) * c.k;
+      else if (c.phase === 'away') q.x = slide;
+      else if (c.phase === 'back') {
+        if (c.turned) q.from = q.x;
+        q.x = q.from + (q.rest - q.from) * c.k;
+      } else q.x = q.rest;
+    }
+
     p.background(backC);
     p.strokeWeight(lineWeight);
     p.stroke(lineC);
@@ -72,7 +94,7 @@ export default dmSketch({
       const q = S.squares[i];
       show(p, q);
       for (let j = 0; j < S.squares.length; j++) if (j !== i) interact(p, S, q, S.squares[j]);
-      q.x = p.map(p.noise(S.frame / 300 + q.d * q.d * q.d), 0, 1, S.start + q.d, S.stop - q.d);
     }
+    if (c.phase === 'hold') S.sleep(c.left);
   },
 });
