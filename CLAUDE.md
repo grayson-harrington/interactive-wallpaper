@@ -47,6 +47,12 @@ had to choose something along the way, say so in your report.
 
 ## Daily Minimal ports
 
+The source archive is the owner's scrape at
+`~/Documents/Programming/Daily Minimal/dm_scraping`. Images are in
+`downloads/<board>/<ID>.<ext>`, and titles and captions are in `rename_manifest.csv`.
+Always port from there. When the owner asks for "a daily minimal" without naming
+one, pick candidates from that archive that aren't in `ported.csv` yet.
+
 Porting a design from the scraped archive has its own project skill,
 [port-daily-minimal](.claude/skills/port-daily-minimal/SKILL.md). Use it whenever the
 owner names a design ID (e.g. `S02-582`) or asks to port a Daily Minimal. Files,
