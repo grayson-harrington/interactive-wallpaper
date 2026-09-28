@@ -32,6 +32,7 @@ The menu lists the two main pieces first, then a faint divider, then everything 
 | Flow Field | Thousands of hairline strokes following Perlin noise, with a rolling erase |
 | Spinodal Decomposition | Phase-separation simulation that settles, holds, and reseeds |
 | L-System Tool | L-system editor with presets, rules, angle, iterations, colors |
+| Nested Orbits | A ball inside a sphere, both covered in nested circles orbiting inside each other; drag to roll it |
 
 ## Daily Minimal
 

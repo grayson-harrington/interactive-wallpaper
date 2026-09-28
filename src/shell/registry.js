@@ -15,6 +15,7 @@ import flowField from '../sketches/flow-field.js';
 import spinodal from '../sketches/spinodal.js';
 import { mountPhotos } from '../sketches/photos.js';
 import lSystem from '../sketches/l-system.js';
+import nestedOrbits from '../sketches/nested-orbits/index.js';
 
 export const DAILY_MINIMAL = 'daily-minimal';
 
@@ -33,6 +34,7 @@ export const entries = [
   { id: 'flow-field', label: 'Flow Field', sketch: flowField },
   { id: 'spinodal', label: 'Spinodal Decomposition', sketch: spinodal },
   { id: 'l-system', label: 'L-System Tool', sketch: lSystem },
+  { id: 'nested-orbits', label: 'Nested Orbits', sketch: nestedOrbits },
 ];
 
 export const DEFAULT_SELECTION = { id: DAILY_MINIMAL, sub: 'S02-404' };
