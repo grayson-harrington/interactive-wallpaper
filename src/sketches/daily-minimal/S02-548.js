@@ -1,11 +1,14 @@
 // S02-548 balanced bauhaus
 // A tilted black rectangle cut by a long diagonal line and its thin twin, five
 // short lines, a bar with a ball resting on it, and two dots. Every line turns
-// light where it crosses the rectangle. After a 15s rest the rectangle turns
-// half a revolution over 36s (each time the other way round from the last), so
-// the slit and the five lines sweep across it, and it lands back on the
-// original. With someone at the page the diagonal line slides sideways toward
-// the cursor, and eases home when they leave.
+// light where it crosses the rectangle. After a 15s rest, over 36s the
+// rectangle turns half a revolution (each time the other way round from the
+// last) while the diagonal line and its twin slide sideways back and forth and
+// the five short lines drift up and down and spread apart, so the slit and the
+// lines sweep across the rectangle, all landing back on the original. With
+// someone at the page the rectangle turns to point at the cursor, the diagonal
+// line slides sideways toward it, the five lines keep drifting, and everything
+// eases home when they leave.
 import { dmSketch, restCycle } from './harness.js';
 import { dotPaperCanvas, paperCanvas } from '../../lib/paper.js';
 
@@ -35,7 +38,11 @@ const AWAY = 36;
 const HOME = 6; // easing home after someone leaves
 
 const FOLLOW = 2.5; // per second
-const REACH = 100; // most the line slides sideways, px
+const REACH = 100; // most the line slides sideways toward the cursor, px
+const SWAY = 55; // ambient sideways slide of the diagonal, px
+const DRIFT = 40; // ambient vertical drift of the five lines, px
+const SPREAD = 0.6; // how much their spacing opens at the extremes
+const DRIFT_PERIOD = 12; // seconds per drift while someone is at the page
 const TAU = Math.PI * 2;
 const smoother = (t) => t * t * t * (t * (t * 6 - 15) + 10);
 const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
@@ -72,7 +79,7 @@ function rectPath(ctx, r, rot) {
 }
 
 // All the lines, in one color.
-function lines(ctx, off) {
+function lines(ctx, off, fl) {
   ctx.lineCap = 'butt';
   ctx.lineWidth = LINE_W;
   ctx.beginPath();
@@ -86,15 +93,16 @@ function lines(ctx, off) {
   ctx.stroke();
   ctx.lineWidth = FIVE.w;
   ctx.beginPath();
+  const mid = FIVE.y0 + ((FIVE.n - 1) * FIVE.step) / 2;
   for (let i = 0; i < FIVE.n; i++) {
-    const y = FIVE.y0 + i * FIVE.step;
+    const y = mid + (i - (FIVE.n - 1) / 2) * FIVE.step * (1 + SPREAD * fl * fl) + fl * DRIFT;
     ctx.moveTo(FIVE.x0, y);
     ctx.lineTo(FIVE.x1, y);
   }
   ctx.stroke();
 }
 
-function draw(p, S, rot, off) {
+function draw(p, S, rot, off, fl) {
   const ctx = p.drawingContext;
   const [px, py] = PAPER;
   const dark = `rgb(${ink},${ink},${ink})`;
@@ -134,12 +142,12 @@ function draw(p, S, rot, off) {
 
   // the lines: dark, then light where they cross the rectangle
   ctx.strokeStyle = dark;
-  lines(ctx, off);
+  lines(ctx, off, fl);
   ctx.save();
   rectPath(ctx, RECT, rot);
   ctx.clip();
   ctx.strokeStyle = light;
-  lines(ctx, off);
+  lines(ctx, off, fl);
   ctx.restore();
 }
 
@@ -157,6 +165,8 @@ export default dmSketch({
     S.side = 1;
     S.rot = 0; // turn of the rectangle beyond its rest pose
     S.off = 0; // sideways slide of the diagonal
+    S.fl = 0; // drift of the five lines, -1..1
+    S.lt = 0; // clock for the drift while someone is at the page
     p.mouseMoved = () => {
       if (!p.isLooping()) p.loop();
     };
@@ -164,26 +174,38 @@ export default dmSketch({
   frame(p, S) {
     const dt = Math.min(S.dt, 0.1);
 
-    if (S.live && S.mode !== 'live') S.mode = 'live';
-    else if (!S.live && S.mode === 'live') {
+    if (S.live && S.mode !== 'live') {
+      // the drift carries on from where the cycle had it
+      if (S.mode === 'cycle' && S.cyc.phase === 'away') S.lt = 3 * S.cyc.k * DRIFT_PERIOD;
+      S.mode = 'live';
+    } else if (!S.live && S.mode === 'live') {
       S.mode = 'home';
       S.homeU = 0;
-      S.from = [S.rot, S.off];
+      S.from = [S.rot, S.off, S.fl];
       S.homeRot = Math.round(S.rot / Math.PI) * Math.PI; // a half turn looks the same
     }
 
     if (S.mode === 'live') {
       const k = Math.min(1, FOLLOW * dt);
-      const target = clamp((S.mouseX - RECT.x) * NX + (S.mouseY - RECT.y) * NY, -REACH, REACH);
-      S.off += (target - S.off) * k;
-      S.rot += (Math.round(S.rot / Math.PI) * Math.PI - S.rot) * k * 0.5;
+      S.lt += dt;
+      S.fl = Math.sin((TAU * S.lt) / DRIFT_PERIOD);
+      const dx = S.mouseX - RECT.x;
+      const dy = S.mouseY - RECT.y;
+      S.off += (clamp(dx * NX + dy * NY, -REACH, REACH) - S.off) * k;
+      if (Math.hypot(dx, dy) > 30) {
+        // point the long side at the cursor; a half turn looks the same
+        let target = Math.atan2(dy, dx) - RECT.rot;
+        target += Math.round((S.rot - target) / Math.PI) * Math.PI;
+        S.rot += (target - S.rot) * k;
+      }
     } else if (S.mode === 'home') {
       S.homeU = Math.min(1, S.homeU + dt / HOME);
       const e = smoother(S.homeU);
       S.rot = S.from[0] + (S.homeRot - S.from[0]) * e;
       S.off = S.from[1] * (1 - e);
+      S.fl = S.from[2] * (1 - e);
       if (S.homeU >= 1) {
-        S.rot = S.off = 0;
+        S.rot = S.off = S.fl = 0;
         S.mode = 'cycle';
         S.cyc = restCycle({ hold: HOLD, away: AWAY });
       }
@@ -191,10 +213,13 @@ export default dmSketch({
       const c = S.cyc;
       c.step(S.dt);
       if (c.turned && c.phase === 'away') S.side = -S.side;
-      S.rot = c.phase === 'away' ? S.side * Math.PI * c.k : 0;
+      const away = c.phase === 'away';
+      S.rot = away ? S.side * Math.PI * c.k : 0;
+      S.off = away ? SWAY * Math.sin(TAU * 2 * c.k) : 0;
+      S.fl = away ? Math.sin(TAU * 3 * c.k) : 0;
     }
 
-    draw(p, S, RECT.rot + S.rot, S.off);
+    draw(p, S, RECT.rot + S.rot, S.off, S.fl);
 
     if (S.mode === 'cycle' && S.cyc.phase === 'hold') S.sleep(S.cyc.left);
   },
