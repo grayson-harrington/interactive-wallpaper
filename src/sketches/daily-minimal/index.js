@@ -32,6 +32,7 @@ import S02_564 from './S02-564.js';
 import S02_582 from './S02-582.js';
 import S02_588 from './S02-588.js';
 import S02_589 from './S02-589.js';
+import S02_630 from './S02-630.js';
 import S02_634 from './S02-634.js';
 import IF_004 from './IF-004.js';
 
@@ -66,6 +67,7 @@ export const dailyMinimal = [
   { id: 'S02-582', label: 'S02-582 Wandering Tunnel', sketch: S02_582 },
   { id: 'S02-588', label: 'S02-588 Black Hole', sketch: S02_588 },
   { id: 'S02-589', label: 'S02-589 Wobbly Ring', sketch: S02_589 },
+  { id: 'S02-630', label: 'S02-630 Horizon Moon', sketch: S02_630 },
   { id: 'S02-634', label: 'S02-634 Magnetic Field', sketch: S02_634 },
   { id: 'IF-004', label: 'IF-004 Cube Triangle', sketch: IF_004 },
 ];
