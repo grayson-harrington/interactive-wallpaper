@@ -22,9 +22,13 @@ import S02_481 from './S02-481.js';
 import S02_484 from './S02-484.js';
 import S02_498 from './S02-498.js';
 import S02_525 from './S02-525.js';
+import S02_548 from './S02-548.js';
 import S02_555 from './S02-555.js';
+import S02_557 from './S02-557.js';
+import S02_564 from './S02-564.js';
 import S02_582 from './S02-582.js';
 import S02_588 from './S02-588.js';
+import S02_589 from './S02-589.js';
 import S02_634 from './S02-634.js';
 import IF_004 from './IF-004.js';
 
@@ -49,9 +53,13 @@ export const dailyMinimal = [
   { id: 'S02-484', label: 'S02-484 Wavy Threads', sketch: S02_484 },
   { id: 'S02-498', label: 'S02-498 Gravity Well', sketch: S02_498 },
   { id: 'S02-525', label: 'S02-525 Broken Square', sketch: S02_525 },
+  { id: 'S02-548', label: 'S02-548 Balanced Bauhaus', sketch: S02_548 },
   { id: 'S02-555', label: 'S02-555 Quarter Bites', sketch: S02_555 },
+  { id: 'S02-557', label: 'S02-557 Sigil', sketch: S02_557 },
+  { id: 'S02-564', label: 'S02-564 Ringed Globe', sketch: S02_564 },
   { id: 'S02-582', label: 'S02-582 Wandering Tunnel', sketch: S02_582 },
   { id: 'S02-588', label: 'S02-588 Black Hole', sketch: S02_588 },
+  { id: 'S02-589', label: 'S02-589 Wobbly Ring', sketch: S02_589 },
   { id: 'S02-634', label: 'S02-634 Magnetic Field', sketch: S02_634 },
   { id: 'IF-004', label: 'IF-004 Cube Triangle', sketch: IF_004 },
 ];
