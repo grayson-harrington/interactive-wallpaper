@@ -3,8 +3,9 @@
 // two tilted orbits carrying dots and rings. After a 15s rest the globe turns
 // once and the bodies make one lap of their orbits over 36s (the dashed
 // circles turning with them), landing back on the original. With someone at
-// the page, dragging spins the globe and speeds up or slows down the orbits,
-// and everything coasts back to rest when they leave.
+// the page, the globe spins faster the further the cursor is to the right of
+// center (and backwards on the left), the orbits speed up and slow down with
+// it, and everything coasts back to rest when they leave.
 import { dmSketch, restCycle, coastTo } from './harness.js';
 
 const bg = 22;
@@ -65,8 +66,8 @@ const LAPS = 1;
 // Live motion, radians per second.
 const ORB_BASE = 0.12;
 const GLOBE_BASE = 0.25;
-const DRAG = 0.03; // globe radians per px dragged
-const RELAX = 1.5; // per second, velocities back to base
+const LEAN = 0.01; // globe radians per second per px of cursor offset
+const FOLLOW = 2.5; // per second, velocities toward their target
 
 const TAU = Math.PI * 2;
 const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
@@ -277,8 +278,7 @@ export default dmSketch({
     S.spin = 0;
     S.orbW = 0;
     S.spinW = 0;
-    S.lastX = NaN;
-    p.mouseDragged = () => {
+    p.mouseMoved = () => {
       if (!p.isLooping()) p.loop();
     };
   },
@@ -296,7 +296,6 @@ export default dmSketch({
         S.orbW = S.spinW = 0;
       }
       S.mode = 'live';
-      S.lastX = S.mouseX;
     } else if (!S.live && S.mode === 'live') {
       S.mode = 'home';
       S.homeU = 0;
@@ -305,22 +304,11 @@ export default dmSketch({
     }
 
     if (S.mode === 'live') {
-      const dx = S.mouseX - S.lastX;
-      S.lastX = S.mouseX;
-      const relax = Math.min(1, RELAX * dt);
-      let spinTarget = GLOBE_BASE;
-      let orbTarget = ORB_BASE;
-      if (p.mouseIsPressed && dt > 0) {
-        const v = clamp((dx * DRAG) / dt, -8, 8);
-        S.spin += dx * DRAG;
-        spinTarget = v;
-        orbTarget = ORB_BASE + v * 0.4;
-        S.spinW += (v - S.spinW) * Math.min(1, 12 * dt);
-      } else {
-        S.spinW += (spinTarget - S.spinW) * relax;
-        S.spin += S.spinW * dt;
-      }
-      S.orbW += (orbTarget - S.orbW) * relax;
+      const k = Math.min(1, FOLLOW * dt);
+      const lean = clamp((S.mouseX - CX) * LEAN, -3, 3);
+      S.spinW += (GLOBE_BASE + lean - S.spinW) * k;
+      S.orbW += (ORB_BASE + lean * 0.4 - S.orbW) * k;
+      S.spin += S.spinW * dt;
       S.orb += S.orbW * dt;
     } else if (S.mode === 'home') {
       S.homeU = Math.min(1, S.homeU + dt / HOME);
