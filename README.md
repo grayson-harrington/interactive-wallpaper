@@ -89,7 +89,7 @@ Server log: `~/Library/Logs/interactive-wallpaper.log`.
 
 Interactive pieces choose their mode on their own. They run an ambient or attract mode (self-playing
 games, a wandering stand-in for the mouse) until real input arrives, switch to full
-controls, and fall back after a minute or so of inactivity. So the desktop gets the ambient
+controls, and fall back after 15 seconds of inactivity. So the desktop gets the ambient
 version and a browser tab gets the interactive one, from the same page.
 
 ## Images (your own, picked up live, not in git)

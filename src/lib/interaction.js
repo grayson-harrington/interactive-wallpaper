@@ -25,7 +25,7 @@ for (const type of ['pointermove', 'pointerdown', 'keydown', 'wheel', 'touchstar
   window.addEventListener(type, mark, { capture: true, passive: true });
 }
 
-export const DEFAULT_IDLE_MS = 60_000;
+export const DEFAULT_IDLE_MS = 15_000;
 
 export function isInteractive(idleMs = DEFAULT_IDLE_MS) {
   if (forced === 'ambient') return false;

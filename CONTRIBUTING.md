@@ -69,7 +69,7 @@ A piece's `setup()` runs the first time it's shown, not at page load.
 Plash may not forward mouse or keyboard input, so every interactive piece needs a mode
 that runs without any input:
 
-- `p.interactive()` is true only while real input has arrived recently (default: the last 60 s).
+- `p.interactive()` is true only while real input has arrived recently (default: the last 15 s).
   Use it to switch between the ambient/attract behavior and full controls. Don't add a manual toggle.
 - Ambient mode should look intentional. For example, a scripted "player" or a wandering stand-in
   for the mouse (`wanderer()` in the DM harness).
