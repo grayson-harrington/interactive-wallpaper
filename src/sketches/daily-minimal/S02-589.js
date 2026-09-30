@@ -1,10 +1,11 @@
 // S02-589 wobbly ring
 // A thick circle with a thin, wobbly outline hugging it, a diagonal line with a
-// thin twin, a small ring and a dot. After a 15s rest, over 36s the wobble
-// travels once around the circle while breathing, the thin twin slides up and
-// down the diagonal, and the ring and dot ride toward each other along it, all
-// landing back on the original. With someone at the page the outline bulges
-// toward the cursor, and it eases home when they leave.
+// thin twin, a small ring and a dot. After a 15s rest, over 36s the outline
+// drifts through a Perlin-noise wobble and settles back into its original
+// shape, the thin twin slides up and down the diagonal, and the ring and dot
+// ride toward each other along it. With someone at the page all of that keeps
+// going on its own, and the outline is also deflected toward the cursor, easing
+// back when they leave.
 import { dmSketch, restCycle } from './harness.js';
 
 const bg = 239;
@@ -34,20 +35,23 @@ const N = DEV.length;
 const OUTLINE_W = 1.3;
 const SAMPLES = 360;
 
+// Perlin wobble: noise walked around the circle, and through time.
+const NOISE_SCALE = 1.1; // radius of the circle in noise space
+const NOISE_SPEED = 0.12; // noise units per second
+const NOISE_AMP = 80; // px per unit of noise, around its middle
+
 // Timing, in seconds.
 const HOLD = 15;
 const AWAY = 36;
-const HOME = 6; // easing home after someone leaves
 
 const FOLLOW = 2.5; // per second
+const RELEASE = 1.5; // the deflection easing back, per second
 const PUSH_REACH = 24; // most the outline is pushed toward the cursor, px
 const PUSH_WIDTH = 0.5; // radians
 const SLIDE_UP = 60; // px the twin slides along the diagonal, each way
 const SLIDE_DOWN = 150;
 const RIDE = 110; // px the ring and dot ride along it
-const BREATH = 0.35;
 const TAU = Math.PI * 2;
-const smoother = (t) => t * t * t * (t * (t * 6 - 15) + 10);
 const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
 
 const LEN = Math.hypot(LINE_B[0] - LINE_A[0], LINE_B[1] - LINE_A[1]);
@@ -56,7 +60,7 @@ const uy = (LINE_B[1] - LINE_A[1]) / LEN;
 
 // Periodic Catmull-Rom through DEV at a turn angle a (radians).
 function dev(a) {
-  const f = (((a / TAU) % 1) + 1) % 1 * N;
+  const f = ((((a / TAU) % 1) + 1) % 1) * N;
   const i = Math.floor(f);
   const t = f - i;
   const p0 = DEV[(i + N - 1) % N];
@@ -64,6 +68,20 @@ function dev(a) {
   const p2 = DEV[(i + 1) % N];
   const p3 = DEV[(i + 2) % N];
   return p1 + 0.5 * t * (p2 - p0 + t * (2 * p0 - 5 * p1 + 4 * p2 - p3 + t * (3 * (p1 - p2) + p3 - p0)));
+}
+
+const cosA = new Float32Array(SAMPLES + 1);
+const sinA = new Float32Array(SAMPLES + 1);
+const base = new Float32Array(SAMPLES + 1); // the original's deviation
+for (let i = 0; i <= SAMPLES; i++) {
+  cosA[i] = Math.cos((i / SAMPLES) * TAU);
+  sinA[i] = Math.sin((i / SAMPLES) * TAU);
+  base[i] = dev((i / SAMPLES) * TAU);
+}
+
+// wobble at sample i and noise time t
+function wobble(p, i, t) {
+  return (p.noise(20 + NOISE_SCALE * cosA[i], 20 + NOISE_SCALE * sinA[i], t) - 0.5) * NOISE_AMP;
 }
 
 function draw(p, S, s) {
@@ -78,21 +96,22 @@ function draw(p, S, s) {
   ctx.arc(CX, CY, R, 0, TAU);
   ctx.stroke();
 
-  // thin wobbly outline: the wobble turned by s.shift, breathing, and pushed
+  // thin wobbly outline: the original shape plus the noise's drift away from
+  // where it started, plus the push toward the cursor
   ctx.lineWidth = OUTLINE_W;
   ctx.beginPath();
   for (let i = 0; i <= SAMPLES; i++) {
-    const a = (i / SAMPLES) * TAU;
-    let d = dev(a - s.shift) * s.amp;
+    let d = base[i];
+    if (s.env > 0) d += s.env * (wobble(p, i, s.t) - S.wobble0[i]);
     if (s.push) {
-      let da = (a - s.pushAt) % TAU;
+      let da = ((i / SAMPLES) * TAU - s.pushAt) % TAU;
       if (da > Math.PI) da -= TAU;
       else if (da < -Math.PI) da += TAU;
       d += s.push * Math.exp(-((da / PUSH_WIDTH) ** 2));
     }
     const r = R + d;
-    const x = CX + r * Math.cos(a);
-    const y = CY + r * Math.sin(a);
+    const x = CX + r * cosA[i];
+    const y = CY + r * sinA[i];
     if (i === 0) ctx.moveTo(x, y);
     else ctx.lineTo(x, y);
   }
@@ -113,7 +132,7 @@ function draw(p, S, s) {
   ctx.lineTo(TWIN_B[0] + ux * t, TWIN_B[1] + uy * t);
   ctx.stroke();
 
-  // small ring and dot, riding the diagonal in opposite directions
+  // small ring and dot, riding the diagonal toward each other
   ctx.lineWidth = SMALL_RING.w;
   ctx.beginPath();
   ctx.arc(SMALL_RING.x + ux * ride, SMALL_RING.y + uy * ride, SMALL_RING.r, 0, TAU);
@@ -131,9 +150,12 @@ export default dmSketch({
   bg,
   fps: 30,
   init(p, S) {
+    p.noiseSeed(589);
+    S.wobble0 = new Float32Array(SAMPLES + 1);
+    for (let i = 0; i <= SAMPLES; i++) S.wobble0[i] = wobble(p, i, 0);
     S.cyc = restCycle({ hold: HOLD, away: AWAY });
-    S.mode = 'cycle'; // cycle | live | home
-    S.s = { shift: 0, amp: 1, slide: 0, push: 0, pushAt: 0 };
+    // env: how much of the noise drift is showing; t: noise time
+    S.s = { env: 0, t: 0, slide: 0, push: 0, pushAt: 0 };
     p.mouseMoved = () => {
       if (!p.isLooping()) p.loop();
     };
@@ -142,51 +164,30 @@ export default dmSketch({
     const dt = Math.min(S.dt, 0.1);
     const s = S.s;
 
-    if (S.live && S.mode !== 'live') S.mode = 'live';
-    else if (!S.live && S.mode === 'live') {
-      S.mode = 'home';
-      S.homeU = 0;
-      S.from = { ...s };
-      // the wobble comes home by the nearest whole turn
-      S.homeShift = Math.round(s.shift / TAU) * TAU;
-    }
+    // the ambient cycle runs the same with or without someone at the page
+    const c = S.cyc;
+    c.step(S.dt);
+    const away = c.phase === 'away';
+    s.env = away ? Math.sin(Math.PI * c.u) ** 2 : 0;
+    s.t = away ? c.u * AWAY * NOISE_SPEED : 0;
+    s.slide = away ? Math.sin(TAU * 2 * c.k) : 0;
 
-    if (S.mode === 'live') {
+    // the outline is also deflected toward the cursor
+    if (S.live) {
       const k = Math.min(1, FOLLOW * dt);
-      s.shift += (Math.round(s.shift / TAU) * TAU - s.shift) * k * 0.5;
-      s.amp += (1 - s.amp) * k;
-      s.slide += (0 - s.slide) * k;
       const dx = S.mouseX - CX;
       const dy = S.mouseY - CY;
-      const at = Math.atan2(dy, dx);
-      let da = at - s.pushAt;
+      let da = Math.atan2(dy, dx) - s.pushAt;
       da = Math.atan2(Math.sin(da), Math.cos(da));
       s.pushAt += da * k;
       s.push += (clamp((Math.hypot(dx, dy) - R) * 0.3, -PUSH_REACH, PUSH_REACH) - s.push) * k;
-    } else if (S.mode === 'home') {
-      S.homeU = Math.min(1, S.homeU + dt / HOME);
-      const e = smoother(S.homeU);
-      const f = S.from;
-      s.shift = f.shift + (S.homeShift - f.shift) * e;
-      s.amp = f.amp + (1 - f.amp) * e;
-      s.slide = f.slide * (1 - e);
-      s.push = f.push * (1 - e);
-      if (S.homeU >= 1) {
-        S.s = { shift: 0, amp: 1, slide: 0, push: 0, pushAt: s.pushAt };
-        S.mode = 'cycle';
-        S.cyc = restCycle({ hold: HOLD, away: AWAY });
-      }
-    } else {
-      const c = S.cyc;
-      c.step(S.dt);
-      const k = c.phase === 'away' ? c.k : 0;
-      s.shift = TAU * k;
-      s.amp = 1 + BREATH * Math.sin(TAU * 3 * k) * (c.phase === 'away' ? 1 : 0);
-      s.slide = c.phase === 'away' ? Math.sin(TAU * 2 * k) : 0;
+    } else if (s.push) {
+      s.push *= Math.max(0, 1 - RELEASE * dt);
+      if (Math.abs(s.push) < 0.05) s.push = 0;
     }
 
-    draw(p, S, S.s);
+    draw(p, S, s);
 
-    if (S.mode === 'cycle' && S.cyc.phase === 'hold') S.sleep(S.cyc.left);
+    if (c.phase === 'hold' && !S.live && !s.push) S.sleep(c.left);
   },
 });
