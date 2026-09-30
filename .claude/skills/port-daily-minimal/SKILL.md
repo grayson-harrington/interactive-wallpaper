@@ -23,6 +23,15 @@ haven't this session.
 
 Don't write sketch code until steps 1–3 are done and the owner has confirmed each.
 
+## 0. Recommending candidates (when the owner hasn't named an ID)
+
+Before listing recommendations, copy each candidate's image from the archive into
+`check-out/candidates/<ID>.<ext>` (gitignored; create the folder if needed). The
+archive is outside the workspace, so VS Code can't open links into it. Put a
+workspace-relative markdown link in the table, e.g.
+`[S02-322](check-out/candidates/S02-322.jpg)`, never a `file://` link or a path
+into the archive. Look at each image yourself first; don't recommend from filenames.
+
 ## 1. Find the image
 
 - Check `ported.csv`. If the ID is already there, say so and ask whether to revise it.
@@ -192,3 +201,8 @@ Plash. Report what you built, any measurements that differed from the confirmed
 description, and any choice you made that they didn't (e.g. how a hidden wall
 behaves once it becomes visible). Offer the overlay image. Commit only when asked,
 following CLAUDE.md's git conventions.
+
+Clean up `check-out/`: nothing in the app reads it (it only holds `npm run check`
+screenshots and the candidate images from step 0), so once the ports are built and
+checked, delete the files you put there (`check-out/candidates/`, screenshots you
+generated). Keep them until then, since the owner may still want to look.

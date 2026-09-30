@@ -68,6 +68,10 @@ committed. Each design is identified by its Daily Minimal ID:
   `title`, and the `ported` date. The date is blank for ports made before this
   file existed. Its `id`, `folder` and `file` columns match the archive's
   `rename_manifest.csv`, so the two can be joined to see what's left.
+- Shared pieces: `moons.js` is the moon-phase row (S02-015, S02-322; a new row
+  supplies its measured phase keyframes and layout), and `pose.js` runs the
+  ambient / interactive / settle lifecycle for pieces whose look is a few numbers
+  (e.g. S02-265).
 - Paper textures come from [src/lib/paper.js](../../lib/paper.js):
   `paperCanvas` (block grain with specks) and `dotPaperCanvas` (1px dots), plus
   `fillPathWithTexture` to clip either one to a shape.
