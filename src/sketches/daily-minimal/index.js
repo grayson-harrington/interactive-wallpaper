@@ -12,6 +12,7 @@ import S02_181 from './S02-181.js';
 import S02_238 from './S02-238.js';
 import S02_265 from './S02-265.js';
 import S02_322 from './S02-322.js';
+import S02_338 from './S02-338.js';
 import S02_341 from './S02-341.js';
 import S02_368 from './S02-368.js';
 import S02_401 from './S02-401.js';
@@ -47,6 +48,7 @@ export const dailyMinimal = [
   { id: 'S02-238', label: 'S02-238 Fractal Cube', sketch: S02_238 },
   { id: 'S02-265', label: 'S02-265 Arch Disc', sketch: S02_265 },
   { id: 'S02-322', label: 'S02-322 Vertical Moons', sketch: S02_322 },
+  { id: 'S02-338', label: 'S02-338 Horizon Fan', sketch: S02_338 },
   { id: 'S02-341', label: 'S02-341 Wavy Lines', sketch: S02_341 },
   { id: 'S02-368', label: 'S02-368 Rectangles in Circle', sketch: S02_368 },
   { id: 'S02-401', label: 'S02-401 Lines Through Circle', sketch: S02_401 },
