@@ -320,6 +320,46 @@ body {
   color: #f0a36b;
 }
 
+/* Gear Train palette: drag a swatch onto the board */
+.sk-panel .gear-palette {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  margin: 0 0 10px;
+}
+
+.sk-panel .gear-palette .swatch {
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+  padding: 4px 0 3px;
+  font-size: 11px;
+  color: var(--ui-muted);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--ui-border);
+  border-radius: 6px;
+  cursor: grab;
+  user-select: none;
+  touch-action: none;
+}
+
+.sk-panel .gear-palette canvas {
+  position: static;
+  width: 44px;
+  height: 44px;
+}
+
+.sk-panel .gear-palette .belt {
+  align-content: center;
+  cursor: pointer;
+}
+
+.sk-panel .gear-palette .belt.active {
+  color: var(--ui-fg);
+  border-color: var(--ui-accent);
+  background: rgba(255, 255, 255, 0.14);
+}
+
 .sk-toggle {
   position: absolute;
   z-index: 11;

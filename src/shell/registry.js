@@ -9,6 +9,7 @@ import { dailyMinimal } from '../sketches/daily-minimal/index.js';
 import bicycleGalaxy from '../sketches/bicycle-galaxy.js';
 import gameOfLife from '../sketches/game-of-life.js';
 import flowPipes from '../sketches/flow-pipes.js';
+import gearTrain from '../sketches/gear-train/index.js';
 import quadTree from '../sketches/quad-tree.js';
 import flocking from '../sketches/flocking.js';
 import flowField from '../sketches/flow-field.js';
@@ -29,6 +30,7 @@ export const entries = [
   { id: 'bicycle-galaxy', label: 'Bicycle Galaxy', sketch: bicycleGalaxy },
   { id: 'game-of-life', label: 'Game of Life', sketch: gameOfLife },
   { id: 'flow-pipes', label: 'Flow Pipes', sketch: flowPipes },
+  { id: 'gear-train', label: 'Gear Train', sketch: gearTrain },
   { id: 'quad-tree', label: 'Quad Tree', sketch: quadTree },
   { id: 'flocking', label: 'Flocking', sketch: flocking },
   { id: 'flow-field', label: 'Flow Field', sketch: flowField },
