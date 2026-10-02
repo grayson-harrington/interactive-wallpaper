@@ -102,18 +102,33 @@ function labelFor(sel) {
 
 // ---- dropdown --------------------------------------------------------------
 
-for (const [i, entry] of entries.entries()) {
+// labeled sections (Favorites, Games) as option groups, then a faint line
+// and the unlabeled rest
+const sections = new Map();
+let ruled = false;
+for (const entry of entries) {
   const opt = document.createElement('option');
   opt.value = entry.id;
   opt.textContent = entry.label;
-  pick.append(opt);
-  // a faint line after the featured pieces
-  if (entry.featured && !entries[i + 1]?.featured) {
+  if (entry.section) {
+    let group = sections.get(entry.section);
+    if (!group) {
+      group = document.createElement('optgroup');
+      group.label = entry.section;
+      pick.append(group);
+      sections.set(entry.section, group);
+    }
+    group.append(opt);
+    continue;
+  }
+  if (!ruled && sections.size) {
     const line = document.createElement('option');
     line.disabled = true;
     line.textContent = '──────────';
     pick.append(line);
+    ruled = true;
   }
+  pick.append(opt);
 }
 
 pick.addEventListener('change', () => {

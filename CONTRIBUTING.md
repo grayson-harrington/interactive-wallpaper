@@ -36,8 +36,9 @@ npx playwright install chromium webkit   # only needed for `npm run check` / `np
    ```
 
 2. Register it in `src/shell/registry.js`. The order of `entries` is the order in the dropdown.
-   Traditional Wallpaper and Daily Minimal come first (`featured: true`), set off by a divider;
-   add new pieces after them.
+   The dropdown has labeled sections, set with `section`: `'Favorites'` (Traditional Wallpaper
+   and Daily Minimal) and `'Games'` (playable pieces such as Flow Pipes). Everything else has
+   no `section` and goes in the unlabeled list after them; add new pieces there unless they're games.
 3. Run `npm run build`, then `npm run check` with the server running.
 
 For a new **Daily Minimal**, build it with `dmSketch()` from `src/sketches/daily-minimal/harness.js`.

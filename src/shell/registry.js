@@ -1,5 +1,6 @@
-// Every selectable piece. Order here is the order in the dropdown: the
-// featured pieces first, then a divider, then the rest.
+// Every selectable piece. Order here is the order in the dropdown. Pieces
+// with a `section` are grouped under that label (Favorites, then Games); the
+// rest follow in an unlabeled section of their own.
 
 import fractalTree from '../sketches/fractal-tree.js';
 import voronoi from '../sketches/voronoi.js';
@@ -21,16 +22,16 @@ import nestedOrbits from '../sketches/nested-orbits/index.js';
 export const DAILY_MINIMAL = 'daily-minimal';
 
 export const entries = [
-  { id: 'photos', label: 'Traditional Wallpaper', mount: mountPhotos, featured: true },
-  { id: DAILY_MINIMAL, label: 'Daily Minimal', group: dailyMinimal, featured: true },
+  { id: 'photos', label: 'Traditional Wallpaper', mount: mountPhotos, section: 'Favorites' },
+  { id: DAILY_MINIMAL, label: 'Daily Minimal', group: dailyMinimal, section: 'Favorites' },
+  { id: 'flow-pipes', label: 'Flow Pipes', sketch: flowPipes, section: 'Games' },
+  { id: 'gear-train', label: 'Gear Train', sketch: gearTrain, section: 'Games' },
   { id: 'fractal-tree', label: 'Fractal Tree', sketch: fractalTree },
   { id: 'voronoi', label: 'Voronoi Images', sketch: voronoi },
   { id: 'terrain', label: 'Procedural Terrain', sketch: terrain },
   { id: 'tree-patterns', label: 'Tree Patterns', sketch: treePatterns },
   { id: 'bicycle-galaxy', label: 'Bicycle Galaxy', sketch: bicycleGalaxy },
   { id: 'game-of-life', label: 'Game of Life', sketch: gameOfLife },
-  { id: 'flow-pipes', label: 'Flow Pipes', sketch: flowPipes },
-  { id: 'gear-train', label: 'Gear Train', sketch: gearTrain },
   { id: 'quad-tree', label: 'Quad Tree', sketch: quadTree },
   { id: 'flocking', label: 'Flocking', sketch: flocking },
   { id: 'flow-field', label: 'Flow Field', sketch: flowField },
