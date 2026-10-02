@@ -15,8 +15,10 @@
 //
 // Ambient mode: an invisible player solves the board slowly, preferring
 // pipes next to the water so the flow visibly spreads.
-// Settings: grid size (cell size) and whether leaks show (on by default; a
-// hint, since it points at misplaced pipes); remembered per browser.
+// Settings: grid size (cell size), whether leaks show (on by default; a
+// hint, since it points at misplaced pipes), and whether ambient mode is
+// allowed (on by default; off keeps the board in interactive mode, so the
+// solver never touches it); remembered per browser.
 
 import { createPanel, autoFade } from '../lib/panel.js';
 
@@ -35,6 +37,7 @@ const rotCW = (m) => ((m << 1) | (m >> 3)) & 15;
 
 const SIZE_KEY = 'iw:pipes:cell';
 const LEAKS_KEY = 'iw:pipes:leaks';
+const AMBIENT_KEY = 'iw:pipes:ambient';
 const FILL_RATE = 0.22; // per frame
 const DRAIN_RATE = 0.25;
 const SPILL_GROW = 0.06; // per frame, ~0.5s to full size
@@ -55,9 +58,11 @@ const COLORS = {
 export default function flowPipes(p) {
   let cellPx = 64;
   let showLeaks = true;
+  let allowAmbient = true;
   try {
     cellPx = Number(localStorage.getItem(SIZE_KEY)) || cellPx;
     showLeaks = localStorage.getItem(LEAKS_KEY) !== '0';
+    allowAmbient = localStorage.getItem(AMBIENT_KEY) !== '0';
   } catch {
     // storage unavailable
   }
@@ -346,6 +351,14 @@ export default function flowPipes(p) {
         // storage unavailable
       }
     });
+    panel.checkbox('Allow ambient mode', allowAmbient, (v) => {
+      allowAmbient = v;
+      try {
+        localStorage.setItem(AMBIENT_KEY, v ? '1' : '0');
+      } catch {
+        // storage unavailable
+      }
+    });
     panel.buttons([
       ['New puzzle', generate],
       ['Hide', () => panel.hide()],
@@ -356,7 +369,7 @@ export default function flowPipes(p) {
   };
 
   p.draw = () => {
-    const live = p.interactive();
+    const live = !allowAmbient || p.interactive();
     const connected = flood();
 
     if (!solvedAt && isSolved(connected)) solvedAt = performance.now();
