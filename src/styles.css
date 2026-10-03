@@ -310,6 +310,11 @@ body {
   cursor: pointer;
 }
 
+.sk-panel button.active {
+  border-color: var(--ui-accent);
+  background: rgba(255, 255, 255, 0.18);
+}
+
 .sk-panel .note {
   margin: 6px 0 0;
   color: var(--ui-muted);

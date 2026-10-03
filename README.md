@@ -33,6 +33,7 @@ The menu lists the two main pieces first, then a faint divider, then everything 
 | Spinodal Decomposition | Phase-separation simulation that settles, holds, and reseeds |
 | L-System Tool | L-system editor with presets, rules, angle, iterations, colors |
 | Nested Orbits | A ball inside a sphere, both covered in nested circles orbiting inside each other; drag to roll it |
+| Neural Cellular Automata | A trained neural CA grows Squirtle, Charmander and Bulbasaur from one cell and heals bites; click for a garden to plant and erase |
 
 ## Daily Minimal
 

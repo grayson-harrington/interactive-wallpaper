@@ -18,6 +18,7 @@ import spinodal from '../sketches/spinodal.js';
 import { mountPhotos } from '../sketches/photos.js';
 import lSystem from '../sketches/l-system.js';
 import nestedOrbits from '../sketches/nested-orbits/index.js';
+import nca from '../sketches/nca/index.js';
 
 export const DAILY_MINIMAL = 'daily-minimal';
 
@@ -38,6 +39,7 @@ export const entries = [
   { id: 'spinodal', label: 'Spinodal Decomposition', sketch: spinodal },
   { id: 'l-system', label: 'L-System Tool', sketch: lSystem },
   { id: 'nested-orbits', label: 'Nested Orbits', sketch: nestedOrbits },
+  { id: 'nca', label: 'Neural Cellular Automata', sketch: nca },
 ];
 
 export const DEFAULT_SELECTION = { id: DAILY_MINIMAL, sub: 'S02-404' };

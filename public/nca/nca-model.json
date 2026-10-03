@@ -1,0 +1,31 @@
+{
+  "source": "runs/multi-c24-h256/model.pt",
+  "step": 20000,
+  "channels": 24,
+  "hidden": 256,
+  "fire_rate": 0.5,
+  "alive_threshold": 0.1,
+  "target_size": 64,
+  "texture": {
+    "width": 25,
+    "height": 256,
+    "format": "RGBA32F"
+  },
+  "targets": {
+    "squirtle": [
+      0.0,
+      0.0,
+      1.0
+    ],
+    "charmander": [
+      1.0,
+      0.0,
+      0.0
+    ],
+    "bulbasaur": [
+      0.0,
+      1.0,
+      0.0
+    ]
+  }
+}
